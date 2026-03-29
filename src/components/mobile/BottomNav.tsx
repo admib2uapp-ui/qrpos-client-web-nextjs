@@ -18,22 +18,28 @@ export function BottomNav() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border/40 md:hidden">
-      <div className="flex items-center justify-around h-16 px-1">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border/40 md:hidden pointer-events-none transition-colors duration-300">
+      <div className="flex items-center justify-around h-16 px-1 pointer-events-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
+          const active = isActive(item.path);
           return (
             <Link
               key={item.path}
               href={item.path}
-              className={`flex flex-col items-center justify-center flex-1 h-full py-2 transition-colors ${
-                isActive(item.path) 
-                  ? "text-primary" 
-                  : "text-muted-foreground hover:text-foreground"
+              className={`flex flex-col items-center justify-center flex-1 h-full py-2 transition-all duration-300 ${
+                active 
+                  ? "text-primary scale-110" 
+                  : "text-muted-foreground/50 hover:text-foreground"
               }`}
             >
-              <Icon className="w-5 h-5" />
-              <span className="text-[10px] mt-0.5 font-medium">{item.label}</span>
+              <div className="relative">
+                 <Icon className="w-5 h-5" />
+                 {active && <div className="absolute -inset-2 bg-primary/20 blur-lg rounded-full" />}
+              </div>
+              <span className={`text-[8px] mt-1 font-black uppercase tracking-[0.2em] transition-opacity duration-300 ${active ? "opacity-100" : "opacity-0"}`}>
+                {item.label}
+              </span>
             </Link>
           );
         })}

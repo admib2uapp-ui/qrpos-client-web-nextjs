@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { QrCode, Keyboard, Calculator } from "lucide-react";
+import { QrCode, TrendingUp } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+import { useTransactions } from "../../hooks/useTransactions";
 import { initiateTransaction } from "../../lib/qrService";
+import { isToday } from "date-fns";
 
 const MAX_AMOUNT = 99999999.99;
 
@@ -23,15 +25,29 @@ const getOperatorSymbol = (op: Operator): string => {
 
 export function MobileAmountInput() {
   const auth = useAuth();
-  const [inputMode, setInputMode] = useState<"keypad" | "normal">("keypad");
+  const { transactions } = useTransactions();
   const [displayValue, setDisplayValue] = useState("0");
   const [expression, setExpression] = useState("");
   const [pendingValue, setPendingValue] = useState<number | null>(null);
   const [operator, setOperator] = useState<Operator>(null);
   const [shouldResetDisplay, setShouldResetDisplay] = useState(false);
   const [manualRef, setManualRef] = useState("");
+  const [showRefInput, setShowRefInput] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+
+  const { todaySalesCount, todaySalesAmount } = useMemo(() => {
+    if (!transactions) return { todaySalesCount: 0, todaySalesAmount: 0 };
+    const todayTransactions = transactions.filter(t => 
+      (t.status === 'SUCCESS' || t.status === 'COMPLETED') && 
+      t.created_at && 
+      isToday(new Date(t.created_at))
+    );
+    return {
+      todaySalesCount: todayTransactions.length,
+      todaySalesAmount: todayTransactions.reduce((acc, t) => acc + (Number(t.amount) || 0), 0)
+    };
+  }, [transactions]);
 
   const calculate = (a: number, b: number, op: Operator): number => {
     switch (op) {
@@ -131,35 +147,17 @@ export function MobileAmountInput() {
     setShouldResetDisplay(false);
   };
 
-
-  const handleInputChange = (value: string) => {
-    const cleaned = value.replace(/[^0-9.]/g, "");
-    const parts = cleaned.split(".");
-    if (parts.length > 2) return;
-    if (parts[1] && parts[1].length > 2) return;
-    const num = parseFloat(cleaned);
-    if (!isNaN(num) && num > MAX_AMOUNT) return;
-    setDisplayValue(cleaned || "0");
-  };
-
   const handleSubmit = async () => {
     const amountNum = parseFloat(displayValue);
     if (!displayValue || amountNum <= 0 || auth.loading || !auth.user) {
       return;
     }
-    if (amountNum > MAX_AMOUNT) {
-      return;
-    }
-
     setIsSubmitting(true);
-    setExpression("");
-
     try {
       const referenceNo = await initiateTransaction(amountNum, manualRef || null, auth.user.id);
       router.push(`/mobile/qr?amount=${encodeURIComponent(displayValue)}&ref=${encodeURIComponent(referenceNo)}`);
     } catch (error) {
       console.error('Failed to create transaction:', error);
-      // Fallback redirect if DB save fails, but ideally we should show an error
       router.push(`/mobile/qr?amount=${encodeURIComponent(displayValue)}`);
     } finally {
       setIsSubmitting(false);
@@ -171,246 +169,131 @@ export function MobileAmountInput() {
     const num = parseFloat(value);
     if (isNaN(num)) return "0.00";
     const parts = num.toFixed(2).split(".");
-    const integerPart = parts[0];
-    const decimalPart = parts[1];
-    const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return `${formattedInteger}.${decimalPart}`;
+    return `${parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}.${parts[1]}`;
   };
 
-  const renderKey = (label: string, onPress: () => void, style?: string) => (
+  const renderKey = (label: string, onPress: () => void, style = "") => (
     <button
       onClick={onPress}
-      className={`flex items-center justify-center h-14 rounded-2xl bg-card shadow-[0_4px_0_0_rgba(0,0,0,0.05)] dark:shadow-[0_4px_0_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-[2px] transition-all text-2xl font-bold text-foreground border border-border/60 dark:border-white/20 hover:bg-secondary/20 ${style || ""}`}
+      className={`relative flex items-center justify-center h-16 rounded-2xl bg-secondary/30 dark:bg-white/5 backdrop-blur-md border border-border/50 dark:border-white/10 shadow-sm active:scale-95 active:bg-secondary/50 dark:active:bg-white/10 transition-all text-2xl font-medium text-foreground group overflow-hidden ${style}`}
     >
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-active:opacity-100 transition-opacity" />
       {label}
     </button>
   );
-
-  const renderOperatorKey = (label: string, onPress: () => void, style?: string) => (
-    <button
-      onClick={onPress}
-      className={`flex items-center justify-center rounded-2xl shadow-md active:scale-95 transition-all text-xl font-black ${style || "bg-primary/10 text-primary border border-primary/30 dark:border-primary/40 hover:bg-primary/20"}`}
-    >
-      {label}
-    </button>
-  );
-
 
   return (
-    <div className="flex flex-col h-full bg-background px-4 py-2">
-      {/* Toggle Button */}
-      <div className="flex justify-end pt-2">
-        <button
-          onClick={() => setInputMode(inputMode === "keypad" ? "normal" : "keypad")}
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-card shadow-md text-[10px] font-bold uppercase tracking-widest text-muted-foreground border border-border/50 active:scale-95 transition-all"
-        >
-          {inputMode === "keypad" ? (
-            <>
-              <Keyboard className="w-4 h-4" />
-              Keyboard
-            </>
-          ) : (
-            <>
-              <Calculator className="w-4 h-4" />
-              Calculator
-            </>
+    <div className="flex flex-col h-full bg-background text-foreground overflow-hidden font-sans relative">
+      {/* Dynamic Background Elements - softer for light mode */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-100 transition-opacity">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[10%] right-[-10%] w-[50%] h-[50%] bg-accent/10 rounded-full blur-[120px]" />
+      </div>
+
+      {/* Header Area / Sales Card */}
+      <div className="px-4 pt-2 pb-4 z-10">
+         <div className="bg-[#34b4ea] dark:bg-primary rounded-[28px] p-5 shadow-lg shadow-primary/10 animate-in zoom-in-95 duration-500">
+            <div className="flex justify-between items-start mb-1">
+               <span className="text-white/80 text-[11px] font-medium tracking-wide">Total Sales Today</span>
+               <button 
+                  onClick={() => setShowRefInput(!showRefInput)}
+                  className="bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full px-3 py-1 text-[9px] font-bold text-white uppercase tracking-wider transition-all"
+               >
+                  {manualRef ? `REF: ${manualRef}` : "Add Ref"}
+               </button>
+            </div>
+            
+            <div className="flex items-baseline gap-1.5 mb-1.5">
+               <span className="text-white text-3xl font-bold tracking-tight">
+                  LKR {Number(todaySalesAmount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+               </span>
+            </div>
+            
+            <div className="flex items-center gap-1.5 text-white/70 text-[10px] font-medium uppercase tracking-[0.05em]">
+               <div className="w-1.5 h-1.5 bg-emerald-300 rounded-full animate-pulse shadow-[0_0_8px_rgba(110,231,183,1)]" />
+               {todaySalesCount} successful transactions
+            </div>
+         </div>
+      </div>
+
+      {/* Amount Section */}
+      <div className="flex-1 flex flex-col justify-center px-6 transition-all duration-500 z-10">
+        <div className="text-center relative">
+          <div className="flex items-baseline justify-center gap-2 mb-1">
+             <span className="text-2xl font-light text-primary/60">LKR</span>
+             <span className="text-7xl font-bold tracking-tighter tabular-nums drop-shadow-sm">
+                {formatDisplay(displayValue)}
+             </span>
+          </div>
+          {expression && (
+            <div className="h-6 text-sm font-medium text-muted-foreground animate-in fade-in slide-in-from-bottom-2">
+              {expression}
+            </div>
           )}
-        </button>
-      </div>
-
-      {/* Spacer to push content down slightly */}
-      <div className="flex-1 min-h-[10px]" />
-
-      {/* Amount Display */}
-      <div className="bg-card rounded-3xl p-6 shadow-2xl border border-border/50 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl" />
-        
-        {/* Manual Reference Input */}
-        <div className="mb-4">
-          <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest mb-1 opacity-70">Reference Number (Optional)</p>
-          <input
-            type="text"
-            value={manualRef}
-            onChange={(e) => setManualRef(e.target.value.toUpperCase())}
-            placeholder="AUTO-GENERATED"
-            className="w-full bg-secondary/30 rounded-lg px-3 py-2 text-sm font-mono font-bold text-foreground border border-border/50 outline-none focus:border-primary/50 transition-colors"
-          />
+          
+          {/* Subtle Ref Input */}
+          <div className={`mt-4 transition-all duration-300 overflow-hidden ${showRefInput ? "max-h-20 opacity-100" : "max-h-0 opacity-0"}`}>
+             <input 
+               type="text" 
+               placeholder="ENTER REFERENCE NO"
+               value={manualRef}
+               onChange={(e) => setManualRef(e.target.value.toUpperCase())}
+               className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-center text-xs font-bold tracking-widest text-primary focus:border-primary/50 focus:bg-secondary outline-none transition-all placeholder:text-muted-foreground/30"
+             />
+          </div>
         </div>
-
-        <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] text-center mb-2 opacity-70">Transaction Amount (LKR)</p>
-        
-        {inputMode === "normal" ? (
-            <input
-            type="number"
-            value={displayValue === "0" ? "" : displayValue}
-            onChange={(e) => handleInputChange(e.target.value)}
-            placeholder="0.00"
-            className="text-5xl font-bold text-foreground bg-transparent text-center w-full outline-none"
-            inputMode="decimal"
-          />
-        ) : (
-          <>
-            {expression ? (
-              <p className="text-sm text-muted-foreground text-center mb-1 min-h-[20px]">
-                {expression}
-              </p>
-            ) : displayValue === "0" ? (
-              <p className="text-sm text-muted-foreground/50 text-center mb-1 min-h-[20px]">
-                ENTER AMOUNT
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center mb-1 min-h-[20px]"></p>
-            )}
-            <p className="text-5xl font-bold text-foreground text-center">
-              {formatDisplay(displayValue)}
-            </p>
-          </>
-        )}
       </div>
 
-      {/* Spacer between display and keypad */}
-      <div className="flex-1 min-h-[10px]" />
-
-      {/* Keypad */}
-      <div className="flex flex-col justify-end pb-4">
-        {inputMode === "normal" ? (
-          <div className="flex flex-col items-center justify-end h-full pb-4">
-            {/* Normal numeric pad - Android style */}
-            <div className="space-y-2 w-full max-w-sm">
-              <div className="grid grid-cols-3 gap-2">
-                {renderKey("1", () => {
-                  const newValue = (displayValue === "0" ? "" : displayValue) + "1";
-                  setDisplayValue(newValue);
-                })}
-                {renderKey("2", () => {
-                  const newValue = (displayValue === "0" ? "" : displayValue) + "2";
-                  setDisplayValue(newValue);
-                })}
-                {renderKey("3", () => {
-                  const newValue = (displayValue === "0" ? "" : displayValue) + "3";
-                  setDisplayValue(newValue);
-                })}
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {renderKey("4", () => {
-                  const newValue = (displayValue === "0" ? "" : displayValue) + "4";
-                  setDisplayValue(newValue);
-                })}
-                {renderKey("5", () => {
-                  const newValue = (displayValue === "0" ? "" : displayValue) + "5";
-                  setDisplayValue(newValue);
-                })}
-                {renderKey("6", () => {
-                  const newValue = (displayValue === "0" ? "" : displayValue) + "6";
-                  setDisplayValue(newValue);
-                })}
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {renderKey("7", () => {
-                  const newValue = (displayValue === "0" ? "" : displayValue) + "7";
-                  setDisplayValue(newValue);
-                })}
-                {renderKey("8", () => {
-                  const newValue = (displayValue === "0" ? "" : displayValue) + "8";
-                  setDisplayValue(newValue);
-                })}
-                {renderKey("9", () => {
-                  const newValue = (displayValue === "0" ? "" : displayValue) + "9";
-                  setDisplayValue(newValue);
-                })}
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {renderKey(".", () => {
-                  if (!displayValue.includes(".")) setDisplayValue(displayValue + ".");
-                })}
-                {renderKey("0", () => {
-                  const newValue = (displayValue === "0" ? "" : displayValue) + "0";
-                  setDisplayValue(newValue);
-                })}
-                {renderKey("⌫", handleBackspace, "bg-destructive/10 text-destructive border-destructive/30 dark:border-destructive/40 active:bg-destructive/20 shadow-none")}
-              </div>
-            </div>
+      {/* Keypad Section - reduced padding to hit BottomNav */}
+      <div className="px-4 pb-20 space-y-3 z-10 overflow-y-auto">
+        <div className="grid grid-cols-4 gap-3">
+          {renderKey("C", handleClear, "text-destructive font-bold bg-destructive/5 border-destructive/10")}
+          {renderKey("÷", () => handleOperator("/"), "text-primary bg-primary/5 border-primary/10")}
+          {renderKey("×", () => handleOperator("*"), "text-primary bg-primary/5 border-primary/10")}
+          {renderKey("⌫", handleBackspace, "text-rose-400 bg-rose-400/5 border-rose-400/10")}
+        </div>
+        
+        <div className="grid grid-cols-4 gap-3">
+          <div className="col-span-3 grid grid-cols-3 gap-3">
+            {["7", "8", "9", "4", "5", "6", "1", "2", "3"].map(num => (
+              renderKey(num, () => handleDigit(num))
+            ))}
+            {renderKey(".", handleDecimal)}
+            {renderKey("0", () => handleDigit("0"))}
+            {renderKey("%", handlePercent, "text-primary/60 text-xl")}
           </div>
-        ) : (
-          <div className="space-y-2">
-          {/* Row 1: C, %, ×, - */}
-          <div className="grid grid-cols-4 gap-2 h-14">
-            {renderOperatorKey("C", handleClear, "bg-orange-500/10 text-orange-500 border border-orange-500/30 dark:border-orange-500/40 hover:bg-orange-500/20")}
-            {renderOperatorKey("%", handlePercent, "bg-indigo-500/10 text-indigo-500 border border-indigo-500/30 dark:border-indigo-500/40 hover:bg-indigo-500/20")}
-            {renderOperatorKey("×", () => handleOperator("*"), "bg-blue-500/10 text-blue-500 border border-blue-500/30 dark:border-blue-500/40 hover:bg-blue-500/20")}
-            {renderOperatorKey("-", () => handleOperator("-"), "bg-blue-500/10 text-blue-500 border border-blue-500/30 dark:border-blue-500/40 hover:bg-blue-500/20")}
-          </div>
-
-          {/* Rows 2-3: 7,8,9 with + */}
-          <div className="flex gap-2">
-            <div className="flex-1 space-y-2">
-              <div className="grid grid-cols-3 gap-2 h-14">
-                {renderKey("7", () => handleDigit("7"))}
-                {renderKey("8", () => handleDigit("8"))}
-                {renderKey("9", () => handleDigit("9"))}
-              </div>
-              <div className="grid grid-cols-3 gap-2 h-14">
-                {renderKey("4", () => handleDigit("4"))}
-                {renderKey("5", () => handleDigit("5"))}
-                {renderKey("6", () => handleDigit("6"))}
-              </div>
-            </div>
-            <button
-              onClick={() => handleOperator("+")}
-              className="w-20 h-[120px] rounded-2xl bg-blue-500/10 text-blue-500 border border-blue-500/30 dark:border-blue-500/40 shadow-md active:scale-95 transition-all text-2xl font-black flex items-center justify-center hover:bg-blue-500/20"
-            >
-              +
-            </button>
-          </div>
-
-          {/* Rows 4-5: 1,2,3 with = */}
-          <div className="flex gap-2">
-            <div className="flex-1 space-y-2">
-              <div className="grid grid-cols-3 gap-2 h-14">
-                {renderKey("1", () => handleDigit("1"))}
-                {renderKey("2", () => handleDigit("2"))}
-                {renderKey("3", () => handleDigit("3"))}
-              </div>
-              <div className="grid grid-cols-3 gap-2 h-14">
-                {renderKey("⌫", handleBackspace, "bg-destructive/10 text-destructive border-destructive/30 dark:border-destructive/40 active:bg-destructive/20 shadow-none")}
-                {renderKey("0", () => handleDigit("0"))}
-                {renderKey(".", handleDecimal)}
-              </div>
-            </div>
+          
+          <div className="col-span-1 flex flex-col gap-3">
+            {renderKey("-", () => handleOperator("-"), "flex-1 text-primary bg-primary/5 border-primary/10")}
+            {renderKey("+", () => handleOperator("+"), "flex-1 text-primary bg-primary/5 border-primary/10")}
             <button
               onClick={handleEquals}
-              className="w-20 h-[120px] rounded-2xl bg-emerald-500 text-white shadow-[0_4px_0_0_#059669] dark:shadow-[0_4px_0_0_rgba(0,0,0,0.5)] border border-emerald-400/20 active:shadow-none active:translate-y-[2px] transition-all text-3xl font-black flex items-center justify-center h-full"
+              className="flex-1 rounded-2xl bg-primary text-primary-foreground text-3xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all"
             >
               =
             </button>
           </div>
-          </div>
-        )}
-
-        {/* Generate QR Button - Fixed at bottom */}
-        <div className="mt-6">
-          <button
-            onClick={handleSubmit}
-            disabled={!displayValue || parseFloat(displayValue) <= 0 || isSubmitting}
-            className={`w-full h-16 rounded-2xl shadow-xl active:scale-95 active:translate-y-[2px] transition-all flex items-center justify-center gap-3 text-xl font-black text-white ${
-              displayValue && parseFloat(displayValue) > 0 && !isSubmitting 
-                ? "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30" 
-                : "bg-muted text-muted-foreground border border-border/50 shadow-none opacity-50"
-            }`}
-          >
-            {isSubmitting ? (
-              <>
-                <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" />
-                Creating...
-              </>
-            ) : (
-              <>
-                <QrCode className="w-7 h-7" />
-                Generate Payment QR
-              </>
-            )}
-          </button>
         </div>
+
+        {/* Action Button */}
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting || parseFloat(displayValue) <= 0}
+          className={`w-full h-18 rounded-[24px] flex items-center justify-center gap-3 text-lg font-bold tracking-widest uppercase transition-all shadow-xl ${
+            isSubmitting || parseFloat(displayValue) <= 0
+              ? "bg-muted text-muted-foreground/30 border border-border/50 cursor-not-allowed"
+              : "bg-emerald-500 text-white shadow-emerald-500/20 active:scale-95 active:shadow-none"
+          }`}
+        >
+          {isSubmitting ? (
+            <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            <>
+              <QrCode className="w-6 h-6" />
+              Generate QR
+            </>
+          )}
+        </button>
       </div>
     </div>
   );

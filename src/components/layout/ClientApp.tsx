@@ -48,12 +48,13 @@ export function ClientApp({ children }: { children: ReactNode }) {
   }
 
   if (isMobile) {
+    const isPremiumPage = pathname.includes("/mobile/calculator") || pathname.includes("/mobile/qr");
     return (
-      <div className="h-screen flex flex-col bg-background text-foreground transition-colors duration-300">
+      <div className={`h-screen flex flex-col transition-colors duration-300 bg-background`}>
         <MobileHeader theme={theme} toggleTheme={toggleTheme} />
-        <div className="flex-1 overflow-y-auto pb-20 pt-14">
+        <main className={`flex-1 overflow-hidden h-full pt-14 ${isPremiumPage ? "" : "pb-20 overflow-y-auto"}`}>
           {children}
-        </div>
+        </main>
         {!isAuthPage && <BottomNav />}
       </div>
     );

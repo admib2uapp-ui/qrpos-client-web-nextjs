@@ -12,7 +12,6 @@ export function MobileQRDisplay() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [isShared, setIsShared] = useState(false);
   const [qrBase64, setQrBase64] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(true);
@@ -23,7 +22,6 @@ export function MobileQRDisplay() {
 
   useEffect(() => {
     if (!user) return;
-
     const fetchQR = async () => {
       setIsGenerating(true);
       setError(null);
@@ -37,7 +35,6 @@ export function MobileQRDisplay() {
         setIsGenerating(false);
       }
     };
-
     fetchQR();
   }, [user, amount, refNo]);
 
@@ -45,136 +42,114 @@ export function MobileQRDisplay() {
     const num = parseFloat(value);
     if (isNaN(num)) return "0.00";
     const parts = num.toFixed(2).split(".");
-    const integerPart = parts[0];
-    const decimalPart = parts[1];
-    const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return `${formattedInteger}.${decimalPart}`;
-  };
-
-  const handleCancel = () => {
-    router.push("/mobile/calculator");
-  };
-
-  const handleShare = () => {
-    setIsShared(true);
-  };
-
-  const handleDone = () => {
-    router.push("/mobile/calculator");
+    return `${parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}.${parts[1]}`;
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
-      {/* Top Actions */}
-      <div className="flex items-center justify-between px-4 pt-4">
+    <div className="flex flex-col h-full bg-background text-foreground overflow-hidden font-sans relative transition-colors duration-300">
+      {/* Premium Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-50 dark:opacity-100 h-full">
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[10%] left-[-10%] w-[50%] h-[50%] bg-emerald-600/10 rounded-full blur-[120px]" />
+      </div>
+
+      {/* Top Header */}
+      <div className="px-6 pt-4 pb-4 flex items-center justify-between z-10">
         <button
-          onClick={handleCancel}
-          className="w-10 h-10 rounded-full bg-card/80 backdrop-blur-sm shadow-md flex items-center justify-center border border-border/50"
+          onClick={() => router.push("/mobile/calculator")}
+          className="w-10 h-10 rounded-full bg-secondary text-foreground/60 border border-border/50 flex items-center justify-center active:scale-95 transition-all shadow-sm"
         >
-          <X className="w-5 h-5 text-muted-foreground" />
+          <X className="w-5 h-5" />
         </button>
         
-        <div className="px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-          <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-tighter">
-            {isGenerating ? "Generating..." : "Waiting for payment"}
-          </span>
+        <div className="px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-md">
+           <div className="flex items-center gap-2">
+              {!isSuccess && !error && <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse shadow-[0_0_8px_hsl(var(--primary))]" />}
+              <span className="text-[10px] font-bold text-primary uppercase tracking-widest">
+                {isGenerating ? "Encrypting..." : isSuccess ? "Payment Confirmed" : "Live Checkout"}
+              </span>
+           </div>
         </div>
       </div>
 
+      {/* Success Celebration Overlay */}
+      {isSuccess && (
+         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/60 backdrop-blur-xl animate-in fade-in duration-700">
+            <div className="relative">
+               <div className="absolute inset-0 bg-emerald-500 blur-[80px] opacity-30 animate-pulse" />
+               <div className="relative w-32 h-32 bg-emerald-500 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.4)] animate-in zoom-in spin-in-12 duration-700">
+                  <CheckCircle2 className="w-16 h-16 text-white" />
+               </div>
+            </div>
+            <h2 className="mt-8 text-4xl font-bold tracking-tighter text-foreground animate-in slide-in-from-bottom-4 duration-1000">Received!</h2>
+            <p className="mt-2 text-muted-foreground font-medium">LKR {formatAmount(amount)} confirmed.</p>
+            <button
+               onClick={() => router.push("/mobile/calculator")}
+               className="mt-12 px-12 py-4 bg-primary text-primary-foreground rounded-full font-bold shadow-2xl active:scale-95 transition-all"
+            >
+               BACK TO HOME
+            </button>
+         </div>
+      )}
+
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4">
-        {/* QR Code Container */}
-        <div className="relative mb-8">
-          <div className="w-64 h-64 bg-white rounded-3xl shadow-2xl flex items-center justify-center p-6 border-4 border-white/10 overflow-hidden relative group">
-            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-            
+      <div className="flex-1 flex flex-col items-center justify-center px-8 z-10">
+        
+        <div className="w-full text-center mb-10">
+           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mb-2 opacity-60">Total Amount</p>
+           <h2 className="text-6xl font-black tracking-tighter flex items-center justify-center gap-2 text-foreground">
+              <span className="text-xl font-light text-primary/60">LKR</span>
+              {formatAmount(amount)}
+           </h2>
+        </div>
+
+        {/* QR Card */}
+        <div className="relative group perspective-1000">
+          <div className="absolute -inset-1 bg-gradient-to-tr from-primary/40 to-emerald-500/40 rounded-[40px] blur-xl opacity-20 group-hover:opacity-40 transition-opacity animate-pulse" />
+          
+          <div className="w-72 h-72 bg-white rounded-[32px] shadow-2xl flex items-center justify-center p-8 border-8 border-black/5 dark:border-white/5 relative overflow-hidden transition-all duration-500 hover:scale-[1.02]">
             {isGenerating ? (
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                <p className="text-[10px] font-bold text-muted-foreground uppercase">Generating...</p>
-              </div>
-            ) : isSuccess ? (
-              <div className="flex flex-col items-center gap-4 animate-in zoom-in duration-500">
-                <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center">
-                  <CheckCircle2 className="w-12 h-12 text-emerald-600 animate-bounce" />
-                </div>
-                <p className="text-xl font-black text-emerald-600 uppercase tracking-tight">Confirmed!</p>
+              <div className="flex flex-col items-center gap-4">
+                <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                <p className="text-[10px] font-black text-black/20 uppercase tracking-widest">Generating...</p>
               </div>
             ) : error ? (
-              <div className="flex flex-col items-center gap-3 text-destructive px-4 text-center">
-                <AlertCircle className="w-12 h-12" />
-                <p className="text-xs font-bold">{error}</p>
-                <button 
-                  onClick={() => window.location.reload()}
-                  className="text-[10px] uppercase underline font-black"
-                >
-                  Retry
-                </button>
+              <div className="flex flex-col items-center gap-4 text-destructive text-center">
+                <AlertCircle className="w-10 h-10" />
+                <p className="text-xs font-bold px-4">{error}</p>
+                <button onClick={() => window.location.reload()} className="text-[10px] uppercase font-black underline">Tap to Retry</button>
               </div>
             ) : qrBase64 ? (
               <img 
                 src={qrBase64.startsWith('data:') ? qrBase64 : `data:image/png;base64,${qrBase64}`} 
-                alt="Payment QR Code"
-                className="w-full h-full object-contain"
+                alt="Payment QR" 
+                className="w-full h-full object-contain mix-blend-multiply"
               />
-            ) : (
-              <div className="w-full h-full bg-slate-50/50 rounded-xl flex items-center justify-center border-2 border-dashed border-slate-200">
-                <QrCode className="w-32 h-32 text-slate-800" />
-              </div>
-            )}
+            ) : null}
           </div>
-          {/* Glow effect */}
-          {!error && (
-            <div className="absolute -inset-6 bg-primary opacity-20 rounded-[3rem] -z-10 blur-2xl animate-pulse" />
-          )}
         </div>
 
-        {/* Reference Number */}
-        <div className="text-center mb-4">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1 opacity-70 font-bold">Reference Number</p>
-          <p className="text-xl font-black text-foreground font-mono tracking-tight bg-secondary/30 px-4 py-1.5 rounded-lg border border-border/50 shadow-inner">
-            {refNo || "REF-000000"}
-          </p>
-        </div>
-
-        {/* Amount Display */}
-        <div className="text-center mb-4">
-          <p className="text-xs text-muted-foreground mb-1 font-medium italic">Total Request Amount</p>
-          <p className="text-5xl font-black text-foreground tracking-tighter flex items-baseline justify-center gap-1">
-            <span className="text-lg font-bold text-primary opacity-80">LKR</span>
-            {formatAmount(amount)}
-          </p>
+        {/* Reference Info */}
+        <div className="mt-12 flex flex-col items-center">
+           <div className="px-5 py-2.5 rounded-2xl bg-secondary border border-border/50 backdrop-blur-md shadow-sm">
+              <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest block mb-1">REFERENCE NO</span>
+              <span className="text-lg font-mono font-bold text-foreground tracking-widest">{refNo || "---"}</span>
+           </div>
         </div>
       </div>
 
-      {/* Bottom Actions */}
-      <div className="p-4 pb-24">
-        {!isShared ? (
-          <>
-            <button
-              onClick={handleShare}
-              className="w-full h-12 rounded-xl bg-primary text-white font-semibold shadow-lg flex items-center justify-center gap-2 mb-3"
-            >
-              <Share2 className="w-5 h-5" />
-              Share QR Code
-            </button>
-            <button
-              onClick={handleCancel}
-              className="w-full h-12 rounded-xl bg-card border border-border/50 text-muted-foreground font-semibold flex items-center justify-center gap-2 active:bg-secondary/50 transition-colors"
-            >
-              <X className="w-5 h-5" />
-              Cancel Transaction
-            </button>
-          </>
-        ) : (
-          <button
-            onClick={handleDone}
-            className="w-full h-12 rounded-xl bg-emerald-500 text-white font-semibold shadow-lg flex items-center justify-center gap-2"
-          >
-            <Check className="w-5 h-5" />
-            Done
-          </button>
-        )}
+      {/* Footer Actions */}
+      <div className="p-6 pb-16 flex flex-col gap-4 z-10">
+         <button className="w-full h-16 rounded-2xl bg-secondary border border-border/50 flex items-center justify-center gap-3 text-foreground font-bold active:bg-secondary/80 active:scale-95 transition-all shadow-sm">
+            <Share2 className="w-5 h-5 text-primary" />
+            Share Payment Link
+         </button>
+         <button 
+            onClick={() => router.push("/mobile/calculator")}
+            className="w-full h-14 rounded-2xl text-muted-foreground/50 text-xs font-bold uppercase tracking-widest active:text-muted-foreground transition-all"
+         >
+            Cancel and Return
+         </button>
       </div>
     </div>
   );

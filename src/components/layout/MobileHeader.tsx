@@ -5,18 +5,20 @@ import { Button } from "@/components/ui/button"
 
 export function MobileHeader({ theme, toggleTheme }: { theme: "light" | "dark"; toggleTheme: () => void }) {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between border-b border-sidebar-border/20 bg-background/80 px-4 backdrop-blur-md md:hidden">
+    <header className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between bg-background/80 backdrop-blur-xl px-6 border-b border-border/40 md:hidden pointer-events-none transition-colors duration-300">
       <div className="flex items-center gap-2">
-        <span className="font-bold text-lg text-foreground tracking-tight">B2U QR</span>
+        <span className="font-black text-xs uppercase tracking-[0.3em] text-foreground/40">B2U Terminal</span>
       </div>
-      <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={toggleTheme} 
-          className="rounded-full w-10 h-10 border border-sidebar-border/10 bg-secondary/30 hover:bg-secondary/50 transition-colors"
-      >
-        {theme === "light" ? <Moon className="h-4 w-4 shrink-0" /> : <Sun className="h-4 w-4 shrink-0" />}
-      </Button>
+      <div className="pointer-events-auto">
+        <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleTheme} 
+            className="rounded-full w-9 h-9 border border-border/50 bg-secondary/80 hover:bg-secondary transition-all shadow-sm active:scale-95"
+        >
+          {theme === "light" ? <Moon className="h-4 w-4 text-foreground/70" /> : <Sun className="h-4 w-4 text-foreground/70" />}
+        </Button>
+      </div>
     </header>
   );
 }
