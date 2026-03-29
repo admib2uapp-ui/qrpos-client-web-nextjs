@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
+import { Loader2, Mail, Lock, Eye, EyeOff, CheckCircle2, QrCode } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export function MobileSignUp() {
   const router = useRouter();
@@ -19,17 +22,17 @@ export function MobileSignUp() {
     setError("");
 
     if (!email || !password || !confirmPassword) {
-      setError("Please fill in all fields");
+      setError("Complete all fields");
       return;
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+      setError("Min. 6 characters required");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError("Passwords mismatch");
       return;
     }
 
@@ -52,172 +55,110 @@ export function MobileSignUp() {
 
   if (success) {
     return (
-      <div className="flex flex-col h-screen bg-slate-100 px-6">
-        <div className="flex flex-col items-center justify-center pt-16 pb-8">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-500 flex items-center justify-center shadow-lg mb-4">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+      <div className="flex flex-col h-screen bg-background items-center justify-center px-[10vw]">
+        <div className="bg-card/50 backdrop-blur-xl rounded-[6vw] p-[10vw] border border-border/40 shadow-2xl text-center space-y-[6vw]">
+          <div className="w-[20vw] h-[20vw] bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto">
+            <CheckCircle2 className="w-[10vw] h-[10vw] text-emerald-500" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">Account Created!</h1>
-          <p className="text-sm text-slate-500 mt-1 text-center">Please check your email to verify your account.</p>
-        </div>
-
-        <div className="bg-white rounded-2xl p-6 shadow-lg">
-          <button
+          <div>
+            <h1 className="text-[6vw] font-black tracking-tight underline decoration-emerald-500/20 underline-offset-4">Success!</h1>
+            <p className="text-[3vw] font-bold text-muted-foreground/60 uppercase tracking-widest mt-[2vw]">Verify your email to activate terminal.</p>
+          </div>
+          <Button
             onClick={() => router.push("/mobile/signin")}
-            className="w-full h-12 rounded-xl bg-primary text-white font-semibold shadow-lg active:scale-95 transition-transform"
+            className="w-full h-[12vw] rounded-full bg-primary font-black uppercase tracking-widest shadow-lg shadow-primary/20"
           >
-            Sign In
-          </button>
+            Go to Login
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen bg-slate-100">
-      {/* Logo Section */}
-      <div className="flex flex-col items-center justify-center pt-12 pb-6">
-        <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg mb-4">
-          <svg
-            className="w-8 h-8 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-            />
-          </svg>
+    <div className="flex flex-col h-screen bg-background transition-colors duration-300 overflow-y-auto pb-[10vh]">
+      {/* Brand Section */}
+      <div className="flex flex-col items-center justify-center pt-[10vh] pb-[6vh] px-[10vw]">
+        <div className="w-[18vw] h-[18vw] max-w-[80px] max-h-[80px] rounded-[5vw] bg-primary flex items-center justify-center shadow-2xl shadow-primary/30 mb-[4vw]">
+          <QrCode className="w-[10vw] h-[10vw] max-w-[40px] max-h-[40px] text-white" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-800">QR POS</h1>
-        <p className="text-sm text-slate-500 mt-1">Accept payments with ease</p>
+        <h1 className="text-[8vw] sm:text-3xl font-black text-foreground tracking-tighter tabular-nums leading-none">Register POS</h1>
+        <p className="text-[3vw] sm:text-sm font-black text-muted-foreground/40 uppercase tracking-[0.4em] mt-[2vw]">Setup Merchant Node</p>
       </div>
 
-      {/* Form Card */}
-      <div className="flex-1 px-6 pb-6">
-        <div className="bg-white rounded-2xl p-6 shadow-lg">
-          <h2 className="text-xl font-bold text-slate-800 mb-1">Create Account</h2>
-          <p className="text-sm text-slate-500 mb-6">Sign up to get started</p>
+      {/* Auth Card */}
+      <div className="px-[6vw]">
+        <div className="bg-card/50 backdrop-blur-xl rounded-[6vw] p-[8vw] shadow-2xl border border-border/40 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[50%] h-[2vw] bg-primary/20 blur-xl" />
+          
+          <div className="mb-[6vw]">
+            <h2 className="text-[6vw] sm:text-xl font-black text-foreground tracking-tight underline decoration-primary/20 underline-offset-4">Create Account</h2>
+            <p className="text-[3vw] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-widest mt-[1vw]">Initialize your terminal access</p>
+          </div>
 
           {error && (
-            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg mb-4">
+            <div className="bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[2.8vw] sm:text-xs font-bold p-[3vw] rounded-[2vw] mb-[6vw]">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSignUp}>
-            {/* Email Input */}
-            <div className="mb-4">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                Email
-              </label>
-              <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-4 h-12">
-                <span className="text-lg mr-3">📧</span>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  className="flex-1 bg-transparent outline-none text-base text-slate-800"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                />
-              </div>
+          <form onSubmit={handleSignUp} className="space-y-[4vw]">
+            <div className="space-y-[1.5vw]">
+              <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Email Address</label>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="merchant@b2u.pos"
+                className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
+                autoCapitalize="none"
+              />
             </div>
 
-            {/* Password Input */}
-            <div className="mb-4">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                Password
-              </label>
-              <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-4 h-12">
-                <span className="text-lg mr-3">🔒</span>
-                <input
-                  type={showPassword ? "text" : "password" as "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="flex-1 bg-transparent outline-none text-base text-slate-800"
-                  autoCapitalize="none"
-                  autoComplete="new-password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-slate-400"
-                >
-                  {showPassword ? (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
-                </button>
-              </div>
+            <div className="space-y-[1.5vw]">
+              <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Secure Password</label>
+              <Input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
+              />
             </div>
 
-            {/* Confirm Password Input */}
-            <div className="mb-6">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                Confirm Password
-              </label>
-              <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-4 h-12">
-                <span className="text-lg mr-3">🔒</span>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="flex-1 bg-transparent outline-none text-base text-slate-800"
-                  autoCapitalize="none"
-                  autoComplete="new-password"
-                />
-              </div>
+            <div className="space-y-[1.5vw]">
+              <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Confirm Pin</label>
+              <Input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
+              />
             </div>
 
-            {/* Submit Button */}
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 rounded-xl bg-primary text-white font-semibold shadow-lg active:scale-95 transition-transform flex items-center justify-center"
+              className="w-full h-[14vw] sm:h-14 rounded-[4vw] bg-primary text-white text-[4vw] font-black uppercase tracking-[0.2em] shadow-xl mt-[4vw] active:scale-[0.97]"
             >
               {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <Loader2 className="w-[6vw] h-[6vw] animate-spin" />
               ) : (
-                "Create Account"
+                "Deploy Account"
               )}
-            </button>
+            </Button>
           </form>
 
-          {/* Switch Mode */}
-          <div className="flex justify-center mt-6">
-            <span className="text-sm text-slate-500">Already have an account?</span>
-            <button
-              onClick={() => router.push("/mobile/signin")}
-              className="text-sm font-semibold text-primary ml-1"
-            >
-              Sign In
-            </button>
+          <div className="flex flex-col items-center mt-[8vw] space-y-[4vw]">
+            <p className="text-[3vw] sm:text-xs font-bold text-muted-foreground/40 uppercase tracking-widest">
+              Existing terminal? <button onClick={() => router.push("/mobile/signin")} className="text-primary/70 font-black">Login Page</button>
+            </p>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="text-center mt-4">
-          <p className="text-xs text-slate-400">
-            By continuing, you agree to our
-          </p>
-          <button className="text-xs font-semibold text-primary">
-            Terms & Privacy Policy
-          </button>
+        <div className="text-center mt-[6vw] opacity-30">
+           <p className="text-[2vw] font-black uppercase tracking-[0.4em]">Proprietary POS OS v2.0</p>
         </div>
       </div>
     </div>

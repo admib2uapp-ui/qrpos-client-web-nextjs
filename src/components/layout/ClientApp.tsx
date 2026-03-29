@@ -52,7 +52,7 @@ export function ClientApp({ children }: { children: ReactNode }) {
     return (
       <div className={`h-screen flex flex-col transition-colors duration-300 bg-background`}>
         <MobileHeader theme={theme} toggleTheme={toggleTheme} />
-        <main className={`flex-1 overflow-hidden h-full pt-14 ${isPremiumPage ? "" : "pb-20 overflow-y-auto"}`}>
+        <main className={`flex-1 overflow-hidden h-full pt-[min(15vw,60px)] ${isPremiumPage ? "" : "pb-[min(18vw,72px)] overflow-y-auto"}`}>
           {children}
         </main>
         {!isAuthPage && <BottomNav />}

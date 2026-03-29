@@ -78,36 +78,34 @@ export default function SummaryDashboard() {
   const totalAmount = filteredTransactions.reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
- 
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Filters</CardTitle>
-          <CardDescription>Select range and filters to refine results.</CardDescription>
+    <div className="space-y-[4vw] sm:space-y-8 animate-in fade-in duration-500 pb-[10vw] sm:pb-0">
+      <Card className="rounded-[4vw] sm:rounded-xl overflow-hidden border-border/40 shadow-sm">
+        <CardHeader className="p-[5vw] sm:p-6">
+          <CardTitle className="text-[5vw] sm:text-xl font-black tracking-tight underline decoration-primary/20">Dashboard Filters</CardTitle>
+          <CardDescription className="text-[3vw] sm:text-sm uppercase tracking-widest font-bold opacity-50">Refine your transaction analytics.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 relative">
+        <CardContent className="p-[5vw] sm:p-6 pt-0 sm:pt-0 space-y-[4vw] sm:space-y-4 relative">
           {loading && (
             <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex items-center justify-center rounded-xl">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           )}
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center gap-[3vw] sm:gap-4">
             <Input
               type="date"
-              className="w-full sm:w-[200px]"
+              className="w-full sm:w-[200px] h-[12vw] sm:h-10 rounded-[2.5vw] sm:rounded-md text-[3.5vw] sm:text-sm font-bold bg-secondary/30"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
-            <span className="hidden sm:inline">-</span>
+            <span className="hidden sm:inline text-muted-foreground">-</span>
             <Input
               type="date"
-              className="w-full sm:w-[200px]"
+              className="w-full sm:w-[200px] h-[12vw] sm:h-10 rounded-[2.5vw] sm:rounded-md text-[3.5vw] sm:text-sm font-bold bg-secondary/30"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
             <Select value={branchFilter} onValueChange={setBranchFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectTrigger className="w-full sm:w-[200px] h-[12vw] sm:h-10 rounded-[2.5vw] sm:rounded-md text-[3.5vw] sm:text-sm font-bold bg-secondary/30">
                 <SelectValue placeholder="Branch" />
               </SelectTrigger>
               <SelectContent>
@@ -117,42 +115,43 @@ export default function SummaryDashboard() {
                 ))}
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={() => { setStartDate(""); setEndDate(""); setBranchFilter("ALL"); }}>
-              Clear
+            <Button 
+                variant="outline" 
+                onClick={() => { setStartDate(""); setEndDate(""); setBranchFilter("ALL"); }}
+                className="w-full sm:w-auto h-[10vw] sm:h-9 text-[3vw] sm:text-xs font-black uppercase tracking-widest rounded-full"
+            >
+              Reset Filters
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="bg-sidebar/50 border-none">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Transactions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{totalCount.toLocaleString()}</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-sidebar/50 border-none">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Amount</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold text-primary">
-                  LKR {totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </p>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-[3vw] sm:gap-4">
+            <div className="bg-[#34b4ea] dark:bg-primary rounded-[4vw] sm:rounded-xl px-[5vw] py-[3.5vw] sm:p-6 shadow-xl shadow-primary/10 relative overflow-hidden group">
+               <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+               <p className="text-[2.8vw] sm:text-xs font-bold text-white/70 uppercase tracking-[0.2em] mb-[0.5vw]">Volume</p>
+               <p className="text-[8vw] sm:text-3xl font-black text-white tracking-tighter tabular-nums leading-none">
+                 {totalCount.toLocaleString()}
+               </p>
+               <p className="text-[2.2vw] sm:text-[10px] font-black text-white/40 uppercase tracking-widest mt-[0.5vw]">Verified Transactions</p>
+            </div>
+            <div className="bg-secondary/30 dark:bg-card border border-border/40 rounded-[4vw] sm:rounded-xl px-[5vw] py-[3.5vw] sm:p-6 shadow-sm">
+               <p className="text-[2.8vw] sm:text-xs font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mb-[0.5vw]">Value</p>
+               <p className="text-[8vw] sm:text-3xl font-black text-primary tracking-tighter tabular-nums leading-none">
+                 LKR {totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+               </p>
+               <p className="text-[2.2vw] sm:text-[10px] font-black text-muted-foreground/30 uppercase tracking-widest mt-[0.5vw]">Total Settlement</p>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Transaction Chart</CardTitle>
-            <CardDescription>Performance Overview</CardDescription>
+      <Card className="rounded-[4vw] sm:rounded-xl overflow-hidden border-border/40 shadow-sm">
+        <CardHeader className="p-[5vw] sm:p-6 flex flex-row items-center justify-between">
+          <div className="space-y-[1vw] sm:space-y-1">
+            <CardTitle className="text-[5vw] sm:text-xl font-black tracking-tight underline decoration-emerald-500/20">Performance Chart</CardTitle>
+            <CardDescription className="text-[2.5vw] sm:text-xs uppercase tracking-widest font-bold opacity-40">Monthly Volume Analytics</CardDescription>
           </div>
           <Select value={chartMode} onValueChange={(v) => setChartMode(v as any)}>
-            <SelectTrigger className="w-[120px]">
+            <SelectTrigger className="w-[30vw] sm:w-[120px] h-[8vw] sm:h-9 rounded-[2vw] sm:rounded-md text-[2.5vw] sm:text-xs font-bold bg-secondary/30">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -161,21 +160,20 @@ export default function SummaryDashboard() {
             </SelectContent>
           </Select>
         </CardHeader>
-        <CardContent>
-          <div className="h-[350px] w-full pt-4">
-            <ResponsiveContainer width="100%" height="100%">
+        <CardContent className="p-[5vw] sm:p-6 pt-0 sm:pt-0">
+          <div className="h-[30vh] min-h-[220px] max-h-[350px] w-full sm:pt-4">
+            <ResponsiveContainer width="100%" height="100%" minHeight={200} debounce={50}>
               <ComposedChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                <YAxis yAxisId="left" axisLine={false} tickLine={false} />
-                <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: '2.5vw' }} />
+                <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: '2.5vw' }} />
+                <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: '2.5vw' }} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', border: 'none', borderRadius: '8px' }}
-                  itemStyle={{ color: '#fff' }}
+                  contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.95)', border: 'none', borderRadius: '12px', padding: '12px' }}
+                  itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 'bold' }}
                 />
-                <Legend />
-                <Bar yAxisId="left" dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Count" />
-                <Line yAxisId="right" type="monotone" dataKey="amount" stroke="#10b981" strokeWidth={2} name="Amount (LKR)" />
+                <Bar yAxisId="left" dataKey="count" fill="#34b4ea" radius={[6, 6, 0, 0]} name="Count" />
+                <Line yAxisId="right" type="monotone" dataKey="amount" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981' }} name="Value" />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
