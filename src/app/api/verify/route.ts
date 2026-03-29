@@ -18,20 +18,14 @@ export async function POST(request: Request) {
     const validApiKey = process.env.VERIFICATION_API_KEY;
 
     if (!apiKey || apiKey !== validApiKey) {
-      console.warn('Unauthorized Verification Attempt:', { 
-        provided: apiKey ? '***' : 'none', 
-        matches: apiKey === validApiKey 
-      });
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.warn('Unauthorized Verification Attempt');
+      return NextResponse.json({ status: 'ERROR', message: 'Unauthorized' }, { status: 401 });
     }
 
     const { reference, status, amount, invoice_number, transkey, originalkey, rvslflag, debitcredit } = data;
 
     if (status.toLowerCase() !== 'success' && status.toLowerCase() !== 'completed') {
-       // If not success, maybe just update status in transactions table?
-       // But user said "when verification received... insert to completed_transactions"
-       // Usually verification is only sent for successful payments.
-       return NextResponse.json({ error: 'Only successful transactions can be completed' }, { status: 400 });
+       return NextResponse.json({ status: 'ERROR', message: 'Only successful transactions can be completed' }, { status: 400 });
     }
 
     // Use unified utility to move record to completed_transactions
@@ -39,22 +33,26 @@ export async function POST(request: Request) {
     
     try {
       console.log('Attempting to complete transaction for reference:', reference);
-      const result = await completeTransaction(reference, parseFloat(amount), {
+      await completeTransaction(reference, parseFloat(amount), {
         local_id: invoice_number,
         transkey,
         originalkey,
         rvslflag,
         debitcredit
       });
-      console.log('Transaction completion successful:', result);
+      console.log('Transaction completion successful');
     } catch (error: any) {
       console.error('Task move error:', error);
-      return NextResponse.json({ error: error.message || 'Failed to complete transaction' }, { status: 500 });
+      const isNotFound = error.message?.includes('not found');
+      return NextResponse.json(
+        { status: 'ERROR', message: isNotFound ? 'Transaction not found' : 'Database error' }, 
+        { status: isNotFound ? 404 : 500 }
+      );
     }
 
-    return NextResponse.json({ status: 'SUCCESS', reference });
+    return NextResponse.json({ status: 'SUCCESS', message: 'OK' });
   } catch (err: any) {
     console.error('Verification error:', err);
-    return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ status: 'ERROR', message: 'Internal Server Error' }, { status: 500 });
   }
 }
