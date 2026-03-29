@@ -21,6 +21,15 @@ export function MobileQRDisplay() {
   const { isSuccess } = useTransactionStatus(refNo, amount);
 
   useEffect(() => {
+    if (isSuccess) {
+      const timer = setTimeout(() => {
+        router.push("/mobile/calculator");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, router]);
+
+  useEffect(() => {
     if (!user) return;
     const fetchQR = async () => {
       setIsGenerating(true);
@@ -43,6 +52,52 @@ export function MobileQRDisplay() {
     if (isNaN(num)) return "0.00";
     const parts = num.toFixed(2).split(".");
     return `${parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}.${parts[1]}`;
+  };
+
+  const handleDownload = async () => {
+    if (!qrBase64) return;
+    try {
+      const link = document.createElement('a');
+      link.href = qrBase64.startsWith('data:') ? qrBase64 : `data:image/png;base64,${qrBase64}`;
+      link.download = `LankaQR_${refNo || Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Download failed:', err);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!qrBase64) return;
+    try {
+      const dataUrl = qrBase64.startsWith('data:') ? qrBase64 : `data:image/png;base64,${qrBase64}`;
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], `LankaQR_${refNo || 'Payment'}.png`, { type: 'image/png' });
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'Payment QR',
+          text: `Scan to pay LKR ${formatAmount(amount)}`,
+        });
+      } else if (navigator.share) {
+        await navigator.share({
+          title: 'Payment QR',
+          text: `Scan to pay LKR ${formatAmount(amount)} (Ref: ${refNo})`,
+          url: window.location.href
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Payment link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Share failed:', err);
+      // Fallback: Copy link
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
+    }
   };
 
   return (
@@ -92,32 +147,24 @@ export function MobileQRDisplay() {
          </div>
       )}
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-[8vw] z-10">
+      {/* Main Content - Maximized QR View */}
+      <div className="flex-1 flex flex-col items-center justify-start pt-[2vh] px-[5vw] z-10 overflow-y-auto">
         
-        <div className="w-full text-center mb-[4vh]">
-           <p className="text-[2.5vw] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mb-[1vh] opacity-60">Total Amount</p>
-           <h2 className="text-[16vw] sm:text-7xl font-black tracking-tighter flex items-center justify-center gap-[2vw] text-foreground leading-none">
-              <span className="text-[4vw] sm:text-xl font-light text-primary/60">LKR</span>
-              {formatAmount(amount)}
-           </h2>
-        </div>
-
-        {/* QR Card - Relative to width but max sized */}
-        <div className="relative group perspective-1000">
-          <div className="absolute -inset-1 bg-gradient-to-tr from-primary/40 to-emerald-500/40 rounded-[10vw] blur-xl opacity-20 group-hover:opacity-40 transition-opacity animate-pulse" />
+        {/* QR Card - Full Width / Optimized Aspect */}
+        <div className="relative group w-full flex justify-center">
+          <div className="absolute -inset-4 bg-gradient-to-tr from-primary/20 to-emerald-500/20 rounded-[10vw] blur-3xl opacity-30 animate-pulse" />
           
-          <div className="w-[75vw] h-[75vw] max-w-[320px] max-h-[320px] bg-white rounded-[8vw] shadow-2xl flex items-center justify-center p-[8vw] border-8 border-black/5 dark:border-white/5 relative overflow-hidden transition-all duration-500 hover:scale-[1.02]">
+          <div className="w-[88vw] min-h-[110vw] bg-white rounded-[6vw] shadow-2xl flex items-center justify-center p-[4vw] border-4 border-black/5 relative overflow-hidden transition-all duration-500">
             {isGenerating ? (
               <div className="flex flex-col items-center gap-[4vw]">
                 <Loader2 className="w-10 h-10 text-primary animate-spin" />
-                <p className="text-[2.5vw] sm:text-[10px] font-black text-black/20 uppercase tracking-widest">Generating...</p>
+                <p className="text-[3vw] sm:text-xs font-black text-black/20 uppercase tracking-[0.2em]">Encrypting QR...</p>
               </div>
             ) : error ? (
-              <div className="flex flex-col items-center gap-[4vw] text-destructive text-center">
-                <AlertCircle className="w-10 h-10" />
-                <p className="text-[3vw] sm:text-xs font-bold px-[4vw]">{error}</p>
-                <button onClick={() => window.location.reload()} className="text-[2.5vw] sm:text-[10px] uppercase font-black underline">Tap to Retry</button>
+              <div className="flex flex-col items-center gap-[4vw] text-destructive text-center p-[6vw]">
+                <AlertCircle className="w-12 h-12" />
+                <p className="text-[3.5vw] sm:text-sm font-bold">{error}</p>
+                <button onClick={() => window.location.reload()} className="px-[6vw] py-[2vw] bg-destructive/10 rounded-full text-[2.5vw] sm:text-[10px] uppercase font-black">Retry</button>
               </div>
             ) : qrBase64 ? (
               <img 
@@ -129,26 +176,37 @@ export function MobileQRDisplay() {
           </div>
         </div>
 
-        {/* Reference Info */}
-        <div className="mt-[6vh] flex flex-col items-center">
-           <div className="px-[5vw] py-[2.5vw] rounded-[4vw] bg-secondary border border-border/50 backdrop-blur-md shadow-sm text-center">
-              <span className="text-[2.5vw] sm:text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest block mb-[0.5vh]">REFERENCE NO</span>
-              <span className="text-[4vw] sm:text-lg font-mono font-bold text-foreground tracking-widest">{refNo || "---"}</span>
-           </div>
-        </div>
+        <p className="mt-[3vh] text-[2.5vw] sm:text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.4em] animate-pulse">
+          Scan to Complete Payment
+        </p>
       </div>
 
-      {/* Footer Actions */}
-      <div className="p-[6vw] pb-16 flex flex-col gap-[3vw] z-10">
-         <button className="w-full h-[8vh] min-h-[56px] rounded-[4vw] bg-secondary border border-border/50 flex items-center justify-center gap-[3vw] text-foreground font-bold active:bg-secondary/80 active:scale-95 transition-all shadow-sm text-[3.8vw] sm:text-base">
-            <Share2 className="w-[5vw] h-[5vw] text-primary" />
-            Share Payment Link
-         </button>
+      {/* Footer Actions - Native Mobile Suite */}
+      <div className="p-[6vw] pb-12 flex flex-col gap-[3.5vw] z-10 bg-background/80 backdrop-blur-xl border-t border-border/10">
+         <div className="flex gap-[3.5vw]">
+            <button 
+              onClick={handleShare}
+              disabled={!qrBase64}
+              className="flex-1 h-[8vh] min-h-[64px] rounded-[5vw] bg-primary text-primary-foreground flex flex-col items-center justify-center gap-[1vw] font-bold active:scale-95 transition-all shadow-xl shadow-primary/20 text-[3.2vw] sm:text-xs disabled:opacity-50"
+            >
+               <Share2 className="w-[5vw] h-[5vw]" />
+               SHARE
+            </button>
+            <button 
+              onClick={handleDownload}
+              disabled={!qrBase64}
+              className="flex-1 h-[8vh] min-h-[64px] rounded-[5vw] bg-secondary border-2 border-border/40 flex flex-col items-center justify-center gap-[1vw] font-bold active:bg-secondary/80 active:scale-95 transition-all shadow-sm text-[3.2vw] sm:text-xs disabled:opacity-50"
+            >
+               <Check className="w-[5vw] h-[5vw] text-emerald-500" />
+               SAVE QR
+            </button>
+         </div>
+
          <button 
             onClick={() => router.push("/mobile/calculator")}
-            className="w-full h-[6vh] rounded-[4vw] text-muted-foreground/50 text-[3vw] sm:text-[10px] font-bold uppercase tracking-widest active:text-muted-foreground transition-all"
+            className="w-full py-[2vh] text-muted-foreground/30 text-[3vw] sm:text-[10px] font-bold uppercase tracking-[0.4em] active:text-muted-foreground transition-all flex items-center justify-center gap-[2vw]"
          >
-            Cancel and Return
+            <X className="w-3 h-3" /> Done / New Sale
          </button>
       </div>
     </div>

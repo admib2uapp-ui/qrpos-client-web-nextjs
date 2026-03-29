@@ -246,14 +246,17 @@ export function MobileAmountInput() {
             </div>
           )}
           
-          {/* Subtle Ref Input */}
-          <div className={`mt-[2vh] transition-all duration-300 overflow-hidden ${showRefInput ? "max-h-[10vh] opacity-100" : "max-h-0 opacity-0"}`}>
+          {/* Compressed Ref Input - Use stopPropagation to ensure focus remains here when clicking inside */}
+          <div 
+            className={`mt-[1vh] transition-all duration-300 overflow-hidden ${showRefInput ? "max-h-[8vh] opacity-100" : "max-h-0 opacity-0"}`}
+            onClick={(e) => e.stopPropagation()} 
+          >
              <input 
                type="text" 
                placeholder="ENTER REFERENCE NO"
                value={manualRef}
                onChange={(e) => setManualRef(e.target.value.toUpperCase())}
-               className={`w-full bg-secondary/50 border rounded-xl px-4 py-[3vh] text-center text-[3vw] sm:text-xs font-bold tracking-widest text-primary focus:bg-secondary outline-none transition-all placeholder:text-muted-foreground/30 ${focusedField === 'ref' ? "border-primary ring-1 ring-primary/30" : "border-border"}`}
+               className={`w-full bg-secondary/50 border rounded-xl px-4 py-[1.2vh] text-center text-[2.8vw] sm:text-[10px] font-bold tracking-widest text-primary focus:bg-secondary outline-none transition-all placeholder:text-muted-foreground/30 ${focusedField === 'ref' ? "border-primary ring-2 ring-primary/40 shadow-sm" : "border-border"}`}
                onFocus={() => setFocusedField('ref')}
              />
           </div>
