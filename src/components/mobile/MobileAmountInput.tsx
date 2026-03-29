@@ -27,7 +27,7 @@ export function MobileAmountInput() {
   const auth = useAuth();
   const { transactions } = useTransactions();
   const [isCalculatorMode, setIsCalculatorMode] = useState(true);
-  const [displayValue, setDisplayValue] = useState("0.00");
+  const [displayValue, setDisplayValue] = useState("0");
   const [expression, setExpression] = useState("");
   const [pendingValue, setPendingValue] = useState<number | null>(null);
   const [operator, setOperator] = useState<Operator>(null);
