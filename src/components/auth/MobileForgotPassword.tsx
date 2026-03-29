@@ -66,7 +66,7 @@ export function MobileForgotPassword() {
       {/* Header */}
       <div className="px-4 pt-4">
         <button
-          onClick={() => router.push(-1)}
+          onClick={() => router.back()}
           className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center"
         >
           <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
