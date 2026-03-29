@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { QrCode, Keyboard, Calculator } from "lucide-react";
-import { supabase, createTransaction, fetchMerchantDetails } from "../../lib/supabase";
 import { useAuth } from "../../hooks/useAuth";
+import { initiateTransaction } from "../../lib/qrService";
 
 const MAX_AMOUNT = 99999999.99;
 
@@ -29,35 +29,9 @@ export function MobileAmountInput() {
   const [pendingValue, setPendingValue] = useState<number | null>(null);
   const [operator, setOperator] = useState<Operator>(null);
   const [shouldResetDisplay, setShouldResetDisplay] = useState(false);
+  const [manualRef, setManualRef] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-
-  const generateReferenceNumber = async (): Promise<string> => {
-    const today = new Date();
-    const dateStr = today.toISOString().slice(0, 10).replace(/-/g, "");
-    
-    const { data: counterData } = await supabase
-      .from('reference_counters')
-      .select('counter')
-      .eq('date', today.toISOString().slice(0, 10))
-      .maybeSingle();
-    
-    let newCounter = 1;
-    if (counterData) {
-      newCounter = counterData.counter + 1;
-      await supabase
-        .from('reference_counters')
-        .update({ counter: newCounter })
-        .eq('date', today.toISOString().slice(0, 10));
-    } else {
-      await supabase
-        .from('reference_counters')
-        .insert({ date: today.toISOString().slice(0, 10), counter: 1 });
-    }
-    
-    const sequenceNum = newCounter.toString().padStart(4, '0');
-    return `LQR${dateStr}${sequenceNum}`;
-  };
 
   const calculate = (a: number, b: number, op: Operator): number => {
     switch (op) {
@@ -181,15 +155,11 @@ export function MobileAmountInput() {
     setExpression("");
 
     try {
-      // Get merchant UUID for database linking
-      const merchant = await fetchMerchantDetails(auth.user.id);
-      const merchantUuid = merchant?.id;
-
-      const referenceNo = await generateReferenceNumber();
-      await createTransaction(amountNum, referenceNo, merchantUuid);
+      const referenceNo = await initiateTransaction(amountNum, manualRef || null, auth.user.id);
       router.push(`/mobile/qr?amount=${encodeURIComponent(displayValue)}&ref=${encodeURIComponent(referenceNo)}`);
     } catch (error) {
       console.error('Failed to create transaction:', error);
+      // Fallback redirect if DB save fails, but ideally we should show an error
       router.push(`/mobile/qr?amount=${encodeURIComponent(displayValue)}`);
     } finally {
       setIsSubmitting(false);
@@ -254,6 +224,19 @@ export function MobileAmountInput() {
       {/* Amount Display */}
       <div className="bg-card rounded-3xl p-6 shadow-2xl border border-border/50 relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl" />
+        
+        {/* Manual Reference Input */}
+        <div className="mb-4">
+          <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest mb-1 opacity-70">Reference Number (Optional)</p>
+          <input
+            type="text"
+            value={manualRef}
+            onChange={(e) => setManualRef(e.target.value.toUpperCase())}
+            placeholder="AUTO-GENERATED"
+            className="w-full bg-secondary/30 rounded-lg px-3 py-2 text-sm font-mono font-bold text-foreground border border-border/50 outline-none focus:border-primary/50 transition-colors"
+          />
+        </div>
+
         <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] text-center mb-2 opacity-70">Transaction Amount (LKR)</p>
         
         {inputMode === "normal" ? (

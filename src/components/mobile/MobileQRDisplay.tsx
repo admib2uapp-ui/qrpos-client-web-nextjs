@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { QrCode, X, Share2, Check, Loader2, AlertCircle } from "lucide-react";
+import { QrCode, X, Share2, Check, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { generateQRData } from "../../lib/qrService";
 import { useAuth } from "../../hooks/useAuth";
+import { supabase } from "../../lib/supabase";
+import { useTransactionStatus } from "../../hooks/useTransactionStatus";
 
 export function MobileQRDisplay() {
   const { user } = useAuth();
@@ -14,9 +16,10 @@ export function MobileQRDisplay() {
   const [qrBase64, setQrBase64] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(true);
-  
   const amount = searchParams.get("amount") || "0";
   const refNo = searchParams.get("ref") || "";
+
+  const { isSuccess } = useTransactionStatus(refNo, amount);
 
   useEffect(() => {
     if (!user) return;
@@ -87,8 +90,15 @@ export function MobileQRDisplay() {
             
             {isGenerating ? (
               <div className="flex flex-col items-center gap-3">
-                <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
                 <p className="text-[10px] font-bold text-muted-foreground uppercase">Generating...</p>
+              </div>
+            ) : isSuccess ? (
+              <div className="flex flex-col items-center gap-4 animate-in zoom-in duration-500">
+                <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <CheckCircle2 className="w-12 h-12 text-emerald-600 animate-bounce" />
+                </div>
+                <p className="text-xl font-black text-emerald-600 uppercase tracking-tight">Confirmed!</p>
               </div>
             ) : error ? (
               <div className="flex flex-col items-center gap-3 text-destructive px-4 text-center">

@@ -15,6 +15,12 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
+// Admin client for server-side operations (bypasses RLS)
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+export const supabaseAdmin = supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
+
 export interface Merchant {
   id: string;
   user_id: string;
@@ -235,4 +241,66 @@ export const createTransaction = async (
 
   if (error) throw error;
   return data;
+};
+
+export const completeTransaction = async (
+  referenceNo: string,
+  verifiedAmount?: number,
+  additionalData?: Partial<CompletedTransaction>
+) => {
+  console.log(`[completeTransaction] Initiating move for ref: ${referenceNo}`);
+  const db = supabaseAdmin || supabase; // Fallback to standard if no service key
+
+  // 1. Fetch the pending transaction
+  const { data: tx, error: fetchError } = await db
+    .from('transactions')
+    .select('*')
+    .eq('reference_no', referenceNo)
+    .single();
+
+  if (fetchError || !tx) {
+    if (fetchError?.code === 'PGRST116') {
+      console.error(`[completeTransaction] No pending transaction found with reference: ${referenceNo}`);
+      throw new Error(`Transaction with reference "${referenceNo}" not found in pending list. Please generate the QR first.`);
+    }
+    console.error(`[completeTransaction] Fetch failed for ${referenceNo}:`, fetchError);
+    throw new Error(fetchError?.message || 'Transaction not found');
+  }
+
+  console.log(`[completeTransaction] Found pending transaction (ID: ${tx.id}), moving to completed...`);
+
+  // 2. Insert into completed_transactions
+  const { error: insertError } = await db
+    .from('completed_transactions')
+    .insert({
+      merchant_id: tx.merchant_id,
+      reference_no: tx.reference_no,
+      amount: verifiedAmount || tx.amount,
+      local_id: tx.local_id,
+      tag: tx.tag,
+      created_at: tx.created_at, // Preserve original creation time
+      ...additionalData
+    });
+
+  if (insertError) {
+    console.error(`[completeTransaction] Insert failed for ${referenceNo}:`, insertError);
+    throw insertError;
+  }
+
+  console.log(`[completeTransaction] Successfully inserted into completed_transactions.`);
+
+  // 3. Delete from transactions table
+  const { error: deleteError } = await db
+    .from('transactions')
+    .delete()
+    .eq('id', tx.id);
+
+  if (deleteError) {
+    console.error(`[completeTransaction] Delete failed for ${referenceNo}:`, deleteError);
+    throw deleteError;
+  }
+
+  console.log(`[completeTransaction] Successfully deleted from pending transactions. Move complete.`);
+
+  return { success: true, reference_no: referenceNo };
 };

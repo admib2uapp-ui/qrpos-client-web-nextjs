@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { TransactionForm, TransactionStatus } from "@/components/qr/QRRegistration";
-import { generateQRData } from "@/lib/qrService";
+import { generateQRData, initiateTransaction } from "@/lib/qrService";
 import { useAuth } from "@/hooks/useAuth";
+import { useTransactionStatus } from "@/hooks/useTransactionStatus";
 
 export default function QRRegistrationPage() {
   const { user } = useAuth();
@@ -12,17 +13,28 @@ export default function QRRegistrationPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { isSuccess } = useTransactionStatus(
+    currentTx?.ref || null, 
+    currentTx?.amount || "0"
+  );
+
   const handleGenerate = async (amount: string, ref: string) => {
     if (!user) return;
     
-    setCurrentTx({ amount, ref });
     setIsLoading(true);
     setError(null);
     setQrBase64(null);
 
     try {
-      // Use the actual reference passed, or it will generate one in the service
-      const base64 = await generateQRData(amount, ref, user.id);
+      // 1. Unified initiation (Saves to Supabase)
+      const amountNum = parseFloat(amount);
+      const referenceNo = await initiateTransaction(amountNum, ref || null, user.id);
+      
+      // Update UI with the final reference
+      setCurrentTx({ amount, ref: referenceNo });
+
+      // 2. QR Generation
+      const base64 = await generateQRData(amount, referenceNo, user.id);
       setQrBase64(base64);
     } catch (err: any) {
       console.error("Error generating QR:", err);
@@ -46,6 +58,7 @@ export default function QRRegistrationPage() {
                 qrBase64={qrBase64}
                 loading={isLoading}
                 error={error}
+                isSuccess={isSuccess}
               />
             ) : (
               <div className="border border-dashed border-sidebar-border/50 rounded-xl h-[400px] flex items-center justify-center text-muted-foreground bg-sidebar/5">

@@ -65,18 +65,41 @@ export function TransactionStatus({
   ref, 
   qrBase64, 
   loading, 
-  error 
+  error,
+  isSuccess 
 }: { 
   amount: string; 
   ref: string; 
   qrBase64: string | null;
   loading: boolean;
   error: string | null;
+  isSuccess?: boolean;
 }) {
   const getQrSrc = (base64: string) => {
     if (base64.startsWith("data:")) return base64;
     return `data:image/png;base64,${base64}`;
   };
+
+  if (isSuccess) {
+    return (
+      <Card className="p-8 flex flex-col items-center justify-center space-y-6 animate-in zoom-in duration-500 bg-green-50/30 border-green-100">
+        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+          <CheckCircle2 className="w-12 h-12 text-green-600 animate-bounce" />
+        </div>
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-bold text-green-700">Payment Received</h2>
+          <p className="text-muted-foreground text-lg">LKR {parseFloat(amount).toFixed(2)}</p>
+          <p className="text-xs font-mono text-muted-foreground/60">{ref}</p>
+        </div>
+        <Button 
+          className="w-full bg-green-600 hover:bg-green-700"
+          onClick={() => window.location.reload()}
+        >
+          New Transaction
+        </Button>
+      </Card>
+    );
+  }
 
   return (
     <Card className="animate-in zoom-in-95 duration-500">
