@@ -60,9 +60,7 @@ export function MobileTransactionHistory() {
   }, [transactions, searchQuery, activeFilter]);
 
   const getTotalSales = () => {
-    return filteredTransactions
-      .filter((t) => t.status === "SUCCESS" || t.status === "COMPLETED")
-      .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+    return filteredTransactions.reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
   };
 
   const formatAmount = (amount: number) => {
