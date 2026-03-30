@@ -90,7 +90,7 @@ export function InstallPWA() {
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-xs font-medium text-emerald-500 bg-emerald-500/10 px-3 py-1.5 rounded-full w-fit">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              Works offline & No App Store needed
+              No PlayStore or AppStore needed
             </div>
             
             <div className="flex gap-3">
