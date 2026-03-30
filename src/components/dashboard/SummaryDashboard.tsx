@@ -28,12 +28,13 @@ import {
   ResponsiveContainer,
   ComposedChart
 } from "recharts";
-import { Loader2 } from "lucide-react";
+import { Loader2, Building2 } from "lucide-react";
 import { useTransactions } from "../../hooks/useTransactions";
+import { BANK_NAMES } from "../../lib/constants";
 import { MOCK_BRANCHES } from "../../lib/mock-data";
 
 export default function SummaryDashboard() {
-  const { transactions, loading } = useTransactions();
+  const { transactions, merchant, loading } = useTransactions();
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [chartMode, setChartMode] = useState<"monthly" | "daily">("monthly");
@@ -104,17 +105,17 @@ export default function SummaryDashboard() {
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
-            <Select value={branchFilter} onValueChange={setBranchFilter}>
-              <SelectTrigger className="w-full sm:w-[200px] h-[12vw] sm:h-10 rounded-[2.5vw] sm:rounded-md text-[3.5vw] sm:text-sm font-bold bg-secondary/30">
-                <SelectValue placeholder="Branch" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All Branches</SelectItem>
-                {MOCK_BRANCHES.map((b) => (
-                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex-1 min-w-[200px] h-[12vw] sm:h-10 rounded-[2.5vw] sm:rounded-md bg-secondary/10 border border-border/20 px-4 flex items-center gap-3">
+              <Building2 className="w-4 h-4 text-primary" />
+              <div className="flex flex-col">
+                <span className="text-[3vw] sm:text-sm font-black text-foreground truncate">
+                  {merchant?.merchant_name || 'No Active Merchant'}
+                </span>
+                <span className="text-[2.2vw] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">
+                  {merchant ? (BANK_NAMES[merchant.bank_code] || merchant.bank_code) : 'N/A'}
+                </span>
+              </div>
+            </div>
             <Button 
                 variant="outline" 
                 onClick={() => { setStartDate(""); setEndDate(""); setBranchFilter("ALL"); }}

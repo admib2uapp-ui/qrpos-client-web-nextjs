@@ -20,8 +20,14 @@ export function useTransactions() {
       const merchantData = await fetchMerchantDetails(user.id);
       setMerchant(merchantData);
 
-      // Transactions are filtered by the merchant row UUID (merchantData?.id)
-      const transactions = await fetchAllTransactions(merchantData?.id);
+      if (!merchantData) {
+        setData([]);
+        setLoading(false);
+        return;
+      }
+
+      // Transactions are filtered by the merchant row UUID (merchantData.id)
+      const transactions = await fetchAllTransactions(merchantData.id);
       setData(transactions);
     } catch (err: any) {
       console.error('useTransactions: Error fetching data:', err);

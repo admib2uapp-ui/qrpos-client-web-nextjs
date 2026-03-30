@@ -4,13 +4,15 @@ import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
 import { format } from "date-fns";
 import { useTransactions } from "../../hooks/useTransactions";
+import { Building2 } from "lucide-react";
+import { BANK_NAMES } from "../../lib/constants";
 
 type FilterTab = "All" | "Completed" | "Pending" | "Failed";
 
 const FILTER_TABS: FilterTab[] = ["All", "Completed", "Pending", "Failed"];
 
 export function MobileTransactionHistory() {
-  const { transactions, loading } = useTransactions();
+  const { transactions, merchant, loading } = useTransactions();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterTab>("All");
 
@@ -69,6 +71,21 @@ export function MobileTransactionHistory() {
 
   return (
     <div className="flex flex-col h-full bg-background transition-colors duration-300">
+
+      {/* Active Merchant Header */}
+      <div className="px-[4vw] py-[2vh] bg-card/10 border-b border-border/10 flex items-center gap-[3vw]">
+        <div className="p-[2.5vw] rounded-[3vw] bg-primary/10">
+          <Building2 className="w-[5vw] h-[5vw] text-primary" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[3.5vw] sm:text-sm font-black text-foreground">
+            {merchant?.merchant_name || 'No Active Merchant'}
+          </span>
+          <span className="text-[2.2vw] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">
+            {merchant ? (BANK_NAMES[merchant.bank_code] || merchant.bank_code) : 'Waiting for profile...'}
+          </span>
+        </div>
+      </div>
 
       {/* Search Bar */}
       <div className="px-[4vw] py-[2vh] bg-card/30 backdrop-blur-sm border-b border-border/20">
