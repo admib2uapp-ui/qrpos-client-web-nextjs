@@ -15,8 +15,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "B2U QR - Next.js",
-  description: "Next.js migration of the B2U QR portal",
+  title: "B2U QR POS Terminal",
+  description: "High-speed mobile POS and LankaQR aggregator terminal",
+  manifest: "/manifest.json",
+  themeColor: "#34b4ea",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "B2U POS",
+  },
 };
 
 export default function RootLayout({
