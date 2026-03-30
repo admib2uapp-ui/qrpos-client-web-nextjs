@@ -164,7 +164,7 @@ export function MobileTransactionHistory() {
       </div>
 
       {/* Transactions List */}
-      <div className="flex-1 overflow-auto px-[4vw] pb-[min(22vw,88px)]">
+      <div className="flex-1 overflow-auto px-[4vw] pb-[min(16vw,64px)]">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-[10vh] gap-[4vw]">
             <div className="w-[10vw] h-[10vw] max-w-[40px] max-h-[40px] border-[3px] border-primary border-t-transparent rounded-full animate-spin"></div>

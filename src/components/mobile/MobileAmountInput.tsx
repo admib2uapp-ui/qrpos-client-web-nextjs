@@ -210,7 +210,7 @@ export function MobileAmountInput() {
 
       {/* Header Area / Sales Card */}
       <div className="px-[4vw] pt-[1vh] pb-[1vh] z-10 shrink-0">
-         <div className="bg-[#34b4ea] dark:bg-primary rounded-[6vw] px-[5vw] py-[3.5vw] shadow-lg shadow-primary/10 animate-in zoom-in-95 duration-500">
+         <div className="bg-[#34b4ea] dark:bg-primary rounded-[6vw] px-[5vw] py-[2.5vw] shadow-lg shadow-primary/10 animate-in zoom-in-95 duration-500">
             <div className="flex justify-between items-start mb-[0.5vw]">
                <span className="text-white/80 text-[2.8vw] sm:text-xs font-medium tracking-wide">Total Sales Today</span>
             </div>
@@ -233,7 +233,7 @@ export function MobileAmountInput() {
         className="px-[4vw] flex-1 flex flex-col justify-center transition-all duration-500 z-10 min-h-[15vh]"
         onClick={() => setFocusedField('amount')}
       >
-        <div className={`text-center relative py-[4vw] px-[2vw] rounded-[6vw] transition-all duration-300 ${focusedField === 'amount' ? "bg-primary/5 ring-1 ring-primary/20" : ""}`}>
+        <div className={`text-center relative py-[4vw] px-[2vw] rounded-[6vw] transition-all duration-300`}>
           <div className="flex items-baseline justify-center gap-[2vw] mb-[0.5vh]">
              <span className="text-[4vw] sm:text-2xl font-light text-primary/60">LKR</span>
              <span className="text-[16vw] sm:text-8xl font-bold tracking-tighter tabular-nums drop-shadow-sm leading-none">
@@ -264,7 +264,7 @@ export function MobileAmountInput() {
       </div>
 
       {/* Keypad Section - Dynamic Layouts */}
-      <div className="px-[3vw] pb-[min(22vw,88px)] space-y-[2vw] z-20 transition-all duration-300 min-h-[min(45vh,420px)] flex flex-col justify-end">
+      <div className="px-[3vw] pb-[min(16vw,64px)] space-y-[2vw] z-20 transition-all duration-300 min-h-[min(45vh,420px)] flex flex-col justify-end">
         {/* Keypad Mode Toggle & Ref Button - Icon only for minimal width and zero overlap */}
         <div className="flex justify-between items-center mb-[0.8vh]">
           <button 
@@ -323,7 +323,7 @@ export function MobileAmountInput() {
                 <button
                   key="equals"
                   onClick={handleEquals}
-                  className="flex-1 rounded-2xl bg-primary text-primary-foreground text-[8vw] sm:text-4xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all min-h-[80px]"
+                  className="flex-1 rounded-2xl bg-primary text-primary-foreground text-[8vw] sm:text-4xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all min-h-[70px]"
                 >
                   =
                 </button>
@@ -345,7 +345,7 @@ export function MobileAmountInput() {
         <button
           onClick={handleSubmit}
           disabled={isSubmitting || parseFloat(displayValue) <= 0}
-          className={`w-full h-[7.5vh] min-h-[56px] rounded-[6vw] flex items-center justify-center gap-[3vw] text-[4.2vw] sm:text-lg font-bold tracking-[0.2em] uppercase transition-all shadow-xl ${
+          className={`w-full h-[6vh] min-h-[48px] rounded-[6vw] flex items-center justify-center gap-[3vw] text-[4.2vw] sm:text-lg font-bold tracking-[0.2em] uppercase transition-all shadow-xl ${
             isSubmitting || parseFloat(displayValue) <= 0
               ? "bg-muted text-muted-foreground/30 border border-border/50 cursor-not-allowed"
               : "bg-emerald-500 text-white shadow-emerald-500/20 active:scale-95 active:shadow-none"
