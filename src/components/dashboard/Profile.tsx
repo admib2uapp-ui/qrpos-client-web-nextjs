@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { fetchProfile, updateProfile, type Profile } from "../../lib/supabase";
-import { Loader2, User, Mail, Building, ShieldCheck, Phone, CheckCircle2 } from "lucide-react";
+import { Loader2, User, Mail, Building, ShieldCheck, Phone, CheckCircle2, Pencil } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -70,14 +70,33 @@ export default function ProfileComponent() {
       </div>
     );
   }
+
+  const getInitials = (name: string) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
   return (
     <div className="space-y-[6vw] sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-[10vw] sm:pb-0">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-[6vw] sm:gap-6">
-        <Card className="lg:col-span-1 h-fit rounded-[4vw] sm:rounded-xl overflow-hidden border-border/40 shadow-sm">
+        <Card className="lg:col-span-1 h-fit rounded-[4vw] sm:rounded-xl overflow-hidden border-border/40 shadow-sm relative group">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors z-10"
+          >
+            <Pencil className="w-4 h-4 text-primary" />
+          </Button>
           <CardContent className="pt-[8vw] sm:pt-6 flex flex-col items-center text-center space-y-[4vw] sm:space-y-4">
             <Avatar className="w-[24vw] h-[24vw] max-w-[96px] max-h-[96px] border-[1vw] sm:border-4 border-primary/20 shadow-xl">
               <AvatarImage src="" />
-              <AvatarFallback className="bg-primary/10 text-primary text-[8vw] sm:text-2xl font-bold font-mono">JD</AvatarFallback>
+              <AvatarFallback className="bg-primary/10 text-primary text-[8vw] sm:text-2xl font-bold font-mono">
+                {getInitials(fullName)}
+              </AvatarFallback>
             </Avatar>
             <div className="space-y-[1vw]">
               <CardTitle className="text-[6vw] sm:text-xl font-black tracking-tight">{fullName || "User"}</CardTitle>
@@ -88,7 +107,6 @@ export default function ProfileComponent() {
                 <ShieldCheck className="w-[3vw] h-[3vw] max-w-[12px] max-h-[12px]" /> Verified
               </Badge>
             </div>
-            <Button className="w-full h-[12vw] sm:h-10 rounded-[3vw] sm:rounded-md text-[3.5vw] sm:text-sm font-black uppercase tracking-widest">Edit Avatar</Button>
           </CardContent>
         </Card>
 
