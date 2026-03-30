@@ -50,7 +50,7 @@ export async function generateReferenceNumber(): Promise<string> {
   const DD = today.getDate().toString().padStart(2, '0');
   const sequenceNum = newCounter.toString().padStart(6, '0');
   
-  return `${MM}${DD}${sequenceNum}`;
+  return `${MM}${DD}${sequenceNum}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 }
 
 /**
@@ -62,10 +62,10 @@ export async function initiateTransaction(amount: number, manualRef: string | nu
     throw new Error('Merchant profile not found');
   }
 
-  const tempRef = await generateReferenceNumber();
+  const referenceNo = Math.random().toString(36).slice(2, 10).toUpperCase() + Date.now().toString().slice(-8);
   
   // Save to transactions table
-  const transaction = await createTransaction(amount, tempRef, manualRef, merchant.id);
+  const transaction = await createTransaction(amount, referenceNo, manualRef, merchant.id);
   
   return transaction;
 }
