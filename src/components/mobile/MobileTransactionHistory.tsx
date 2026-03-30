@@ -73,7 +73,7 @@ export function MobileTransactionHistory() {
     <div className="flex flex-col h-full bg-background transition-colors duration-300">
 
       {/* Active Merchant Header */}
-      <div className="px-[4vw] py-[2vh] bg-card/10 border-b border-border/10 flex items-center gap-[3vw]">
+      <div className="px-[4vw] py-[1.2vh] bg-card/10 border-b border-border/10 flex items-center gap-[3vw]">
         <div className="p-[2.5vw] rounded-[3vw] bg-primary/10">
           <Building2 className="w-[5vw] h-[5vw] text-primary" />
         </div>
@@ -88,7 +88,7 @@ export function MobileTransactionHistory() {
       </div>
 
       {/* Search Bar */}
-      <div className="px-[4vw] py-[2vh] bg-card/30 backdrop-blur-sm border-b border-border/20">
+      <div className="px-[4vw] py-[1.2vh] bg-card/30 backdrop-blur-sm border-b border-border/20">
         <div className="relative group">
           <Search className="absolute left-[3vw] top-1/2 -translate-y-1/2 w-[4.5vw] h-[4.5vw] max-w-[20px] max-h-[20px] text-muted-foreground transition-colors group-focus-within:text-primary" />
           <input
@@ -112,8 +112,8 @@ export function MobileTransactionHistory() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="px-[4vw] py-[1.5vh] bg-card/20 border-b border-border/10 overflow-hidden">
-        <div className="flex gap-[2vw] overflow-x-auto pb-[1vh] scrollbar-hide">
+      <div className="px-[4vw] py-[1vh] bg-card/20 border-b border-border/10 overflow-hidden">
+        <div className="flex gap-[2vw] overflow-x-auto pb-[0.5vh] scrollbar-hide">
           {FILTER_TABS.map((tab) => (
             <button
               key={tab}
@@ -131,7 +131,7 @@ export function MobileTransactionHistory() {
       </div>
 
       {/* Summary Card - Matching Calculator Style */}
-      <div className="px-[4vw] py-[2vh]">
+      <div className="px-[4vw] py-[1vh]">
         <div className="bg-[#34b4ea] dark:bg-primary rounded-[6vw] px-[5vw] py-[3.5vw] shadow-xl shadow-primary/10 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-[40%] h-full bg-white/10 skew-x-[-20deg] translate-x-[20%] transition-transform group-hover:translate-x-[10%]" />
           <p className="text-[2.8vw] sm:text-[11px] font-bold text-white/70 uppercase tracking-[0.2em] mb-[0.5vw]">
@@ -159,14 +159,14 @@ export function MobileTransactionHistory() {
             <p className="text-[2.8vw] sm:text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">Synching with blockchain...</p>
           </div>
         ) : filteredTransactions.length > 0 ? (
-          <div className="space-y-[3vw] pt-[1vh]">
+          <div className="space-y-[2vw] pt-[0.5vh]">
             {filteredTransactions.map((tx) => {
               const statusConfig = getStatusConfig(tx.status);
               const key = tx.id || tx.transaction_uuid;
               return (
                 <div
                   key={key}
-                  className="bg-card/40 hover:bg-card/60 rounded-[4vw] p-[4vw] shadow-sm border border-border/30 backdrop-blur-sm transition-all active:scale-[0.98]"
+                  className="bg-card/40 hover:bg-card/60 rounded-[4vw] p-[3vw] shadow-sm border border-border/30 backdrop-blur-sm transition-all active:scale-[0.98]"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-[3vw]">

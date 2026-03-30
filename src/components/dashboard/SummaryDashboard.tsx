@@ -85,7 +85,7 @@ export default function SummaryDashboard() {
           <CardTitle className="text-[5vw] sm:text-xl font-black tracking-tight underline decoration-primary/20">Dashboard Filters</CardTitle>
           <CardDescription className="text-[3vw] sm:text-sm uppercase tracking-widest font-bold opacity-50">Refine your transaction analytics.</CardDescription>
         </CardHeader>
-        <CardContent className="p-[5vw] sm:p-6 pt-0 sm:pt-0 space-y-[4vw] sm:space-y-4 relative">
+        <CardContent className="px-[4vw] py-[3vw] sm:p-6 space-y-[4vw] sm:space-y-6 relative">
           {loading && (
             <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex items-center justify-center rounded-xl">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -125,8 +125,8 @@ export default function SummaryDashboard() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-[3vw] sm:gap-4">
-            <div className="bg-[#34b4ea] dark:bg-primary rounded-[4vw] sm:rounded-xl px-[5vw] py-[3.5vw] sm:p-6 shadow-xl shadow-primary/10 relative overflow-hidden group">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-[2vw] sm:gap-4">
+            <div className="bg-[#34b4ea] dark:bg-primary rounded-[4vw] sm:rounded-xl px-[4vw] py-[3vw] sm:p-6 shadow-xl shadow-primary/10 relative overflow-hidden group">
                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                <p className="text-[2.8vw] sm:text-xs font-bold text-white/70 uppercase tracking-[0.2em] mb-[0.5vw]">Volume</p>
                <p className="text-[8vw] sm:text-3xl font-black text-white tracking-tighter tabular-nums leading-none">
@@ -134,7 +134,7 @@ export default function SummaryDashboard() {
                </p>
                <p className="text-[2.2vw] sm:text-[10px] font-black text-white/40 uppercase tracking-widest mt-[0.5vw]">Verified Transactions</p>
             </div>
-            <div className="bg-secondary/30 dark:bg-card border border-border/40 rounded-[4vw] sm:rounded-xl px-[5vw] py-[3.5vw] sm:p-6 shadow-sm">
+            <div className="bg-secondary/30 dark:bg-card border border-border/40 rounded-[4vw] sm:rounded-xl px-[4vw] py-[3vw] sm:p-6 shadow-sm">
                <p className="text-[2.8vw] sm:text-xs font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mb-[0.5vw]">Value</p>
                <p className="text-[8vw] sm:text-3xl font-black text-primary tracking-tighter tabular-nums leading-none">
                  LKR {totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -145,8 +145,8 @@ export default function SummaryDashboard() {
         </CardContent>
       </Card>
 
-      <Card className="rounded-[4vw] sm:rounded-xl overflow-hidden border-border/40 shadow-sm">
-        <CardHeader className="p-[5vw] sm:p-6 flex flex-row items-center justify-between">
+      <Card className="border-none shadow-none bg-transparent">
+        <CardHeader className="px-[4vw] py-[3vw] sm:p-6 pb-0 sm:pb-4 border-b border-sidebar-border/20">
           <div className="space-y-[1vw] sm:space-y-1">
             <CardTitle className="text-[5vw] sm:text-xl font-black tracking-tight underline decoration-emerald-500/20">Performance Chart</CardTitle>
             <CardDescription className="text-[2.5vw] sm:text-xs uppercase tracking-widest font-bold opacity-40">Monthly Volume Analytics</CardDescription>
