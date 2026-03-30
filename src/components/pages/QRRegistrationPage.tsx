@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { TransactionForm, TransactionStatus } from "@/components/qr/QRRegistration";
 import { generateQRData, initiateTransaction } from "@/lib/qrService";
+import { DbTransaction } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
 import { useTransactionStatus } from "@/hooks/useTransactionStatus";
 
@@ -28,13 +29,13 @@ export default function QRRegistrationPage() {
     try {
       // 1. Unified initiation (Saves to Supabase)
       const amountNum = parseFloat(amount);
-      const referenceNo = await initiateTransaction(amountNum, ref || null, user.id);
+      const transaction = await initiateTransaction(amountNum, ref || null, user.id);
       
       // Update UI with the final reference
-      setCurrentTx({ amount, ref: referenceNo });
+      setCurrentTx({ amount, ref: transaction.reference_no });
 
       // 2. QR Generation
-      const base64 = await generateQRData(amount, referenceNo, user.id);
+      const base64 = await generateQRData(amount, transaction, user.id);
       setQrBase64(base64);
     } catch (err: any) {
       console.error("Error generating QR:", err);
