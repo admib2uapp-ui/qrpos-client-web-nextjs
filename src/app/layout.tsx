@@ -15,14 +15,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "B2U QR POS Terminal",
+  title: "QR POS Terminal",
   description: "High-speed mobile POS and LankaQR aggregator terminal",
   manifest: "/manifest.json",
   themeColor: "#34b4ea",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "B2U POS",
+    title: "QR POS",
+  },
+  icons: {
+    icon: [
+      { url: "/logo.jpeg" },
+      { url: "/logo.jpeg", sizes: "32x32", type: "image/jpeg" },
+    ],
+    shortcut: "/logo.jpeg",
+    apple: "/logo.jpeg",
   },
 };
 

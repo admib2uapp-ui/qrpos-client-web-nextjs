@@ -94,7 +94,7 @@ export function MobileSignUp() {
         <div className="w-[10vh] h-[10vh] max-w-[80px] max-h-[80px] rounded-[5vw] bg-primary flex items-center justify-center shadow-2xl shadow-primary/30 mb-[2vh]">
           <QrCode className="w-[5vh] h-[5vh] max-w-[40px] max-h-[40px] text-white" />
         </div>
-        <h1 className="text-[4vh] max-text-3xl font-black text-foreground tracking-tighter tabular-nums leading-none">Register POS</h1>
+        <h1 className="text-[4vh] max-text-3xl font-black text-foreground tracking-tighter tabular-nums leading-none">QR POS</h1>
         <p className="text-[1.5vh] max-text-sm font-black text-muted-foreground/40 uppercase tracking-[0.4em] mt-[1vh]">Setup Merchant Node</p>
       </div>
 

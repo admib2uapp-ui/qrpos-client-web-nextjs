@@ -1,6 +1,6 @@
 {
-  "name": "LankaQR POS Terminal",
-  "short_name": "B2U POS",
+  "name": "QR POS Terminal",
+  "short_name": "QR POS",
   "description": "High-speed mobile POS and LankaQR aggregator terminal for merchants.",
   "start_url": "/mobile/calculator",
   "display": "standalone",
@@ -8,21 +8,15 @@
   "theme_color": "#34b4ea",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/logo.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "/favicon.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/favicon.svg",
+      "src": "/logo.jpeg",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/jpeg",
       "purpose": "maskable"
     }
   ]

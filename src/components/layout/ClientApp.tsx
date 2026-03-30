@@ -35,7 +35,7 @@ export function ClientApp({ children }: { children: ReactNode }) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-background">
         <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-        <p className="text-sm text-muted-foreground animate-pulse">Initializing B2U QR...</p>
+        <p className="text-sm text-muted-foreground animate-pulse">Initializing QR POS...</p>
       </div>
     );
   }

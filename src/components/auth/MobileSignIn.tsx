@@ -43,7 +43,7 @@ export function MobileSignIn() {
           <div className="absolute inset-0 bg-white/20 skew-x-[-20deg] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
           <QrCode className="w-[6vh] h-[6vh] max-w-[40px] max-h-[40px] text-white" />
         </div>
-        <h1 className="text-[5vh] max-text-3xl font-black text-foreground tracking-tighter tabular-nums leading-none">B2U Terminal</h1>
+        <h1 className="text-[5vh] max-text-3xl font-black text-foreground tracking-tighter tabular-nums leading-none">QR POS</h1>
         <p className="text-[1.5vh] max-text-sm font-black text-muted-foreground/40 uppercase tracking-[0.4em] mt-[1.5vh]">Premium QR Payments</p>
       </div>
 

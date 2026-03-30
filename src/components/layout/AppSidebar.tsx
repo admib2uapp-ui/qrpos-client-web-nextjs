@@ -48,7 +48,7 @@ export function AppSidebar({ theme, toggleTheme }: { theme: "light" | "dark"; to
   return (
     <Sidebar collapsible="icon" className="sidebar-glass">
       <SidebarHeader className="border-b border-sidebar-border/50 py-4">
-        <SidebarBrand title="B2U QR" />
+        <SidebarBrand title="QR POS" />
       </SidebarHeader>
       
       <SidebarContent>

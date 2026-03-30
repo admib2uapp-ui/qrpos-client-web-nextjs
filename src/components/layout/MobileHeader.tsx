@@ -7,7 +7,7 @@ export function MobileHeader({ theme, toggleTheme }: { theme: "light" | "dark"; 
   return (
     <header className="fixed inset-x-0 top-0 z-50 flex h-[min(15vw,60px)] items-center justify-between bg-background/80 backdrop-blur-xl px-[4vw] border-b border-border/40 md:hidden pointer-events-none transition-colors duration-300">
       <div className="flex items-center gap-[2vw]">
-        <span className="font-black text-[2.5vw] sm:text-[10px] uppercase tracking-[0.3em] text-foreground/40">B2U Terminal</span>
+        <span className="font-black text-[2.5vw] sm:text-[10px] uppercase tracking-[0.3em] text-foreground/40">QR POS</span>
       </div>
       <div className="pointer-events-auto">
         <Button 
