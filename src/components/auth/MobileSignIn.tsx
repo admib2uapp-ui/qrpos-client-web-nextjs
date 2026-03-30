@@ -36,23 +36,23 @@ export function MobileSignIn() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background transition-colors duration-300 overflow-y-auto">
-      {/* Brand Section */}
-      <div className="flex flex-col items-center justify-center pt-[15vh] pb-[8vh] px-[10vw]">
-        <div className="w-[18vw] h-[18vw] max-w-[80px] max-h-[80px] rounded-[5vw] bg-primary flex items-center justify-center shadow-2xl shadow-primary/30 mb-[4vw] relative overflow-hidden group">
+    <div className="flex flex-col min-h-[100svh] h-[100svh] bg-background transition-colors duration-300 overflow-y-auto">
+      {/* Brand Section - Dynamically scaling based on viewport height */}
+      <div className="flex flex-col items-center justify-center pt-[4vh] pb-[3vh] px-[10vw] flex-shrink-0">
+        <div className="w-[12vh] h-[12vh] max-w-[80px] max-h-[80px] rounded-[5vw] bg-primary flex items-center justify-center shadow-2xl shadow-primary/30 mb-[3vh] relative overflow-hidden group">
           <div className="absolute inset-0 bg-white/20 skew-x-[-20deg] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-          <QrCode className="w-[10vw] h-[10vw] max-w-[40px] max-h-[40px] text-white" />
+          <QrCode className="w-[6vh] h-[6vh] max-w-[40px] max-h-[40px] text-white" />
         </div>
-        <h1 className="text-[8vw] sm:text-3xl font-black text-foreground tracking-tighter tabular-nums leading-none">B2U Terminal</h1>
-        <p className="text-[3vw] sm:text-sm font-black text-muted-foreground/40 uppercase tracking-[0.4em] mt-[2vw]">Premium QR Payments</p>
+        <h1 className="text-[5vh] max-text-3xl font-black text-foreground tracking-tighter tabular-nums leading-none">B2U Terminal</h1>
+        <p className="text-[1.5vh] max-text-sm font-black text-muted-foreground/40 uppercase tracking-[0.4em] mt-[1.5vh]">Premium QR Payments</p>
       </div>
 
       {/* Auth Card */}
       <div className="flex-1 px-[6vw] pb-[10vh]">
-        <div className="bg-card/50 backdrop-blur-xl rounded-[6vw] p-[8vw] shadow-2xl border border-border/40 relative overflow-hidden">
+        <div className="bg-card/50 backdrop-blur-xl rounded-[6vw] p-[6vw] shadow-2xl border border-border/40 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-[50%] h-[2vw] bg-primary/20 blur-xl" />
           
-          <div className="mb-[8vw]">
+          <div className="mb-[4vw]">
             <h2 className="text-[6vw] sm:text-xl font-black text-foreground tracking-tight underline decoration-primary/20 underline-offset-4">Welcome Back</h2>
             <p className="text-[3vw] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-widest mt-[1vw]">Sign in to your merchant terminal</p>
           </div>
@@ -63,7 +63,7 @@ export function MobileSignIn() {
             </div>
           )}
 
-          <form onSubmit={handleSignIn} className="space-y-[5vw]">
+          <form onSubmit={handleSignIn} className="space-y-[4vw]">
             <div className="space-y-[2vw]">
               <label className="text-[2.5vw] sm:text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">
                 Access Email
@@ -127,7 +127,7 @@ export function MobileSignIn() {
             </Button>
           </form>
 
-          <div className="flex flex-col items-center mt-[10vw] space-y-[4vw]">
+          <div className="flex flex-col items-center mt-[6vw] space-y-[3vw]">
             <p className="text-[3vw] sm:text-xs font-bold text-muted-foreground/40 uppercase tracking-widest">
               New merchant? <button onClick={() => router.push("/mobile/signup")} className="text-primary/70 font-black">Register Terminal</button>
             </p>

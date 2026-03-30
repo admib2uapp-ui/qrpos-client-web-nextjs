@@ -6,6 +6,7 @@ import { supabase } from "../../lib/supabase";
 import { Loader2, Mail, Lock, Eye, EyeOff, CheckCircle2, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "../../lib/utils";
 
 export function MobileSignUp() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export function MobileSignUp() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -86,14 +88,14 @@ export function MobileSignUp() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background transition-colors duration-300 overflow-y-auto pb-[10vh]">
-      {/* Brand Section */}
-      <div className="flex flex-col items-center justify-center pt-[10vh] pb-[6vh] px-[10vw]">
-        <div className="w-[18vw] h-[18vw] max-w-[80px] max-h-[80px] rounded-[5vw] bg-primary flex items-center justify-center shadow-2xl shadow-primary/30 mb-[4vw]">
-          <QrCode className="w-[10vw] h-[10vw] max-w-[40px] max-h-[40px] text-white" />
+    <div className="flex flex-col min-h-[100svh] h-[100svh] bg-background transition-colors duration-300 overflow-y-auto pb-[5vh]">
+      {/* Brand Section - Dynamically scaling based on viewport height */}
+      <div className="flex flex-col items-center justify-center pt-[3vh] pb-[2vh] px-[10vw] flex-shrink-0">
+        <div className="w-[10vh] h-[10vh] max-w-[80px] max-h-[80px] rounded-[5vw] bg-primary flex items-center justify-center shadow-2xl shadow-primary/30 mb-[2vh]">
+          <QrCode className="w-[5vh] h-[5vh] max-w-[40px] max-h-[40px] text-white" />
         </div>
-        <h1 className="text-[8vw] sm:text-3xl font-black text-foreground tracking-tighter tabular-nums leading-none">Register POS</h1>
-        <p className="text-[3vw] sm:text-sm font-black text-muted-foreground/40 uppercase tracking-[0.4em] mt-[2vw]">Setup Merchant Node</p>
+        <h1 className="text-[4vh] max-text-3xl font-black text-foreground tracking-tighter tabular-nums leading-none">Register POS</h1>
+        <p className="text-[1.5vh] max-text-sm font-black text-muted-foreground/40 uppercase tracking-[0.4em] mt-[1vh]">Setup Merchant Node</p>
       </div>
 
       {/* Auth Card */}
@@ -112,7 +114,7 @@ export function MobileSignUp() {
             </div>
           )}
 
-          <form onSubmit={handleSignUp} className="space-y-[4vw]">
+          <form onSubmit={handleSignUp} className="space-y-[3vw]">
             <div className="space-y-[1.5vw]">
               <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Full Name</label>
               <Input
@@ -163,24 +165,45 @@ export function MobileSignUp() {
 
             <div className="space-y-[1.5vw]">
               <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Secure Password</label>
-              <Input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
-              />
+              <div className="relative group">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold pr-[12vw]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-[4vw] top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-primary transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-[5vw] h-[5vw]" /> : <Eye className="w-[5vw] h-[5vw]" />}
+                </button>
+              </div>
             </div>
 
             <div className="space-y-[1.5vw]">
-              <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Confirm Pin</label>
-              <Input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
-              />
+              <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Confirm Password</label>
+              <div className="relative group">
+                <Input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className={cn(
+                    "h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold pr-[12vw]",
+                    confirmPassword && password !== confirmPassword && "border-rose-500 ring-4 ring-rose-500/10"
+                  )}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-[4vw] top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-primary transition-colors"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-[5vw] h-[5vw]" /> : <Eye className="w-[5vw] h-[5vw]" />}
+                </button>
+              </div>
             </div>
 
             <Button
