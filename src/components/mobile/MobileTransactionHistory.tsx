@@ -14,7 +14,7 @@ const FILTER_TABS: FilterTab[] = ["All", "Completed", "Pending", "Failed"];
 export function MobileTransactionHistory() {
   const { transactions, merchant, loading } = useTransactions();
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<FilterTab>("All");
+  const [activeFilter, setActiveFilter] = useState<FilterTab>("Completed");
 
   const getStatusConfig = (status: string) => {
     switch (status) {
