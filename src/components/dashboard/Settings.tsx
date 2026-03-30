@@ -179,7 +179,7 @@ export default function Settings() {
           </CardContent>
         </Card>
 
-        {allMerchants.length > 0 && (
+        {(allMerchants.length > 0 || qrResult || qrLoading || qrError) && (
           <Card className="border-border/40 bg-card/30 backdrop-blur-xl rounded-[6vw] sm:rounded-2xl overflow-hidden shadow-2xl shadow-primary/5">
             <CardHeader className="p-[5vw] sm:p-6 pb-[2vw] sm:pb-4">
               <div className="flex flex-col gap-[4vw] sm:gap-4">
