@@ -33,6 +33,7 @@ export interface Merchant {
   country_code: string;
   currency_code: string;
   details_locked: boolean;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
   payment_status: string;
@@ -52,9 +53,74 @@ export const fetchMerchantDetails = async (userId: string): Promise<Merchant | n
     .from('merchants')
     .select('*')
     .eq('user_id', userId)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (error) throw error;
+  
+  // Fallback to first one if no active one found
+  if (!data) {
+    const { data: first } = await supabase
+      .from('merchants')
+      .select('*')
+      .eq('user_id', userId)
+      .limit(1)
+      .maybeSingle();
+    return first;
+  }
+  
+  return data;
+};
+
+export const fetchAllMerchants = async (userId: string): Promise<Merchant[]> => {
+  const { data, error } = await supabase
+    .from('merchants')
+    .select('*')
+    .eq('user_id', userId)
+    .order('is_active', { ascending: false })
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+};
+
+export const setActiveMerchant = async (userId: string, merchantId: string): Promise<void> => {
+  // 1. Deactivate all
+  const { error: deactivateError } = await supabase
+    .from('merchants')
+    .update({ is_active: false })
+    .eq('user_id', userId);
+
+  if (deactivateError) throw deactivateError;
+
+  // 2. Activate the selected one
+  const { error: activateError } = await supabase
+    .from('merchants')
+    .update({ is_active: true })
+    .eq('id', merchantId);
+
+  if (activateError) throw activateError;
+};
+
+export const upsertMerchantDetails = async (userId: string, details: Partial<Merchant>): Promise<Merchant> => {
+  // If this is the first merchant, make it active
+  const existing = await fetchAllMerchants(userId);
+  const shouldBeActive = existing.length === 0;
+
+  const { data, error } = await supabase
+    .from('merchants')
+    .upsert({
+      user_id: userId,
+      ...details,
+      is_active: shouldBeActive || details.is_active,
+      updated_at: new Date().toISOString(),
+    }, {
+      onConflict: 'user_id,bank_code'
+    })
+    .select()
     .single();
 
-  if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "no rows found"
+  if (error) throw error;
   return data;
 };
 
