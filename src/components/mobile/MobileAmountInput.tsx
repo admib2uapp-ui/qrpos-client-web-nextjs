@@ -57,7 +57,7 @@ export function MobileAmountInput() {
       case "-": return a - b;
       case "*": return a * b;
       case "/": return b !== 0 ? a / b : 0;
-      case "%": return a * (b / 100);
+      case "%": return a - (a * (b / 100));
       default: return b;
     }
   };
@@ -124,10 +124,8 @@ export function MobileAmountInput() {
   };
 
   const handlePercent = () => {
-    const currentValue = parseFloat(displayValue);
-    const percentValue = currentValue / 100;
-    setDisplayValue(percentValue.toString());
-    setExpression(`${displayValue}%`);
+    handleOperator("%");
+    setDisplayValue("0");
   };
 
   const handleDecimal = () => {
@@ -235,14 +233,21 @@ export function MobileAmountInput() {
       >
         <div className={`text-center relative py-[4vw] px-[2vw] rounded-[6vw] transition-all duration-300`}>
           <div className="flex items-baseline justify-center gap-[2vw] mb-[0.5vh]">
-             <span className="text-[4vw] sm:text-2xl font-light text-primary/60">LKR</span>
+             <span className="text-[4vw] sm:text-2xl font-light text-primary/60 uppercase">
+               {operator === "%" ? "Discount" : "LKR"}
+             </span>
              <span className="text-[16vw] sm:text-8xl font-bold tracking-tighter tabular-nums drop-shadow-sm leading-none">
                 {formatDisplay(displayValue)}
              </span>
+             {operator === "%" && (
+                <span className="text-[8vw] sm:text-4xl font-bold text-primary/60 self-center ml-1">%</span>
+             )}
           </div>
-          {expression && (
+          {(expression || (operator === "%" && pendingValue !== null)) && (
             <div className="h-[3vh] text-[4vw] sm:text-lg font-medium text-muted-foreground animate-in fade-in slide-in-from-bottom-2">
-              {expression}
+              {operator === "%" && pendingValue !== null 
+                ? `Original: LKR ${Number(pendingValue).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+                : expression}
             </div>
           )}
           
@@ -302,7 +307,7 @@ export function MobileAmountInput() {
           <>
             <div className="grid grid-cols-4 gap-[2vw]">
               {renderKey("C", handleClear, "text-destructive font-bold bg-destructive/5 border-destructive/10 h-[6.5svh] min-h-[44px] text-[5.5vw] sm:text-2xl", "clear")}
-              {renderKey("÷", () => handleOperator("/"), "text-primary bg-primary/5 border-primary/10 h-[6.5svh] min-h-[44px] text-[5.5vw] sm:text-2xl", "divide")}
+              {renderKey("%", handlePercent, "text-primary/60 bg-secondary/30 dark:bg-white/5 h-[6.5svh] min-h-[44px] text-[5vw] sm:text-xl", "percent")}
               {renderKey("×", () => handleOperator("*"), "text-primary bg-primary/5 border-primary/10 h-[6.5svh] min-h-[44px] text-[5.5vw] sm:text-2xl", "multiply")}
               {renderKey("⌫", handleBackspace, "text-rose-400 bg-rose-400/5 border-rose-400/10 h-[6.5svh] min-h-[44px] text-[5.5vw] sm:text-2xl", "backspace")}
             </div>
@@ -314,7 +319,7 @@ export function MobileAmountInput() {
                 ))}
                 {renderKey(".", handleDecimal, "bg-secondary/30 dark:bg-white/5 h-[6.5svh] min-h-[44px] text-[5.5vw] sm:text-2xl", "decimal")}
                 {renderKey("0", () => handleDigit("0"), "bg-secondary/30 dark:bg-white/5 h-[6.5svh] min-h-[44px] text-[5.5vw] sm:text-2xl", "zero")}
-                {renderKey("%", handlePercent, "text-primary/60 bg-secondary/30 dark:bg-white/5 h-[6.5svh] min-h-[44px] text-[5vw] sm:text-xl", "percent")}
+                {renderKey("÷", () => handleOperator("/"), "text-primary bg-primary/5 border-primary/10 h-[6.5svh] min-h-[44px] text-[5.5vw] sm:text-2xl", "divide")}
               </div>
               
               <div className="col-span-1 flex flex-col gap-[2vw]">
