@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { fetchProfile, updateProfile, type Profile } from "../../lib/supabase";
-import { Loader2, User, Mail, Building, ShieldCheck, Phone, CheckCircle2, Pencil } from "lucide-react";
+import { Loader2, User, Mail, Building, ShieldCheck, Phone, CheckCircle2, Pencil, LogOut } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 
 export default function ProfileComponent() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -102,10 +102,17 @@ export default function ProfileComponent() {
               <CardTitle className="text-[6vw] sm:text-xl font-black tracking-tight">{fullName || "User"}</CardTitle>
               <CardDescription className="text-[3vw] sm:text-sm font-bold uppercase tracking-widest opacity-50">{profile?.company_name || "Merchant Admin"}</CardDescription>
             </div>
-            <div className="flex gap-[2vw] justify-center">
+            <div className="flex flex-col gap-[3vw] sm:gap-3 items-center w-full">
               <Badge variant="outline" className="gap-[1vw] border-emerald-500/30 text-emerald-500 bg-emerald-500/5 px-[3vw] py-[1vw] text-[2.5vw] sm:text-xs font-bold uppercase tracking-widest">
                 <ShieldCheck className="w-[3vw] h-[3vw] max-w-[12px] max-h-[12px]" /> Verified
               </Badge>
+              <Button 
+                variant="ghost" 
+                onClick={() => signOut()}
+                className="gap-[2vw] sm:gap-2 text-rose-500 hover:text-rose-600 hover:bg-rose-500/5 transition-all text-[3vw] sm:text-xs font-bold uppercase tracking-widest mt-[2vw] sm:mt-2"
+              >
+                <LogOut className="w-[4vw] h-[4vw] max-w-[14px] max-h-[14px]" /> Sign Out
+              </Button>
             </div>
           </CardContent>
         </Card>
