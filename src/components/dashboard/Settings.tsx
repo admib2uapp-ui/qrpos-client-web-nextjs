@@ -255,19 +255,21 @@ export default function Settings() {
               {allMerchants.map((m) => (
                 <div 
                   key={m.id} 
-                  className={`p-[4vw] sm:p-4 rounded-[4vw] sm:rounded-xl border transition-all duration-300 ${
+                  className={`relative p-[4vw] sm:p-4 rounded-[4vw] sm:rounded-xl border transition-all duration-300 ${
                     m.is_active 
                       ? "bg-primary/10 border-primary/30 shadow-lg shadow-primary/5" 
                       : "bg-muted/10 border-border/40 hover:bg-muted/20"
                   }`}
                 >
+                  {m.is_active && (
+                    <span className="absolute top-[3vw] right-[3vw] sm:top-3 sm:right-3 bg-primary text-primary-foreground text-[2vw] sm:text-[9px] font-black px-[2vw] py-[0.8vw] sm:px-2 sm:py-0.5 rounded-full uppercase tracking-tighter flex items-center justify-center min-w-[12vw] sm:min-w-[40px]">
+                      Active
+                    </span>
+                  )}
                   <div className="flex items-center justify-between">
                     <div className="space-y-[1vw]">
                       <div className="flex items-center gap-[2vw]">
                         <span className="text-[3.2vw] sm:text-sm font-black">{m.merchant_name}</span>
-                        {m.is_active && (
-                          <span className="bg-primary text-primary-foreground text-[2vw] sm:text-[9px] font-black px-[2vw] py-[0.5vw] rounded-full uppercase tracking-tighter">Active</span>
-                        )}
                       </div>
                       <div className="flex items-center gap-[2vw] text-muted-foreground font-bold text-[2.5vw] sm:text-[10px] opacity-70">
                         <MapPin className="w-[3vw] h-[3vw]" />
