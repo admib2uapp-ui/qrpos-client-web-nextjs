@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 import { ReactNode, useState, useEffect } from "react";
 import { SignIn } from "@/components/auth/SignIn";
 import { MobileSignIn } from "@/components/auth/MobileSignIn";
+import { InstallPWA } from "@/components/pwa/InstallPWA";
 
 export function ClientApp({ children }: { children: ReactNode }) {
   const isMobile = useIsMobile();
@@ -51,6 +52,7 @@ export function ClientApp({ children }: { children: ReactNode }) {
     const isPremiumPage = pathname.includes("/mobile/calculator") || pathname.includes("/mobile/qr");
     return (
       <div className={`h-screen flex flex-col transition-colors duration-300 bg-background`}>
+        <InstallPWA />
         <MobileHeader theme={theme} toggleTheme={toggleTheme} />
         <main className={`flex-1 overflow-hidden h-full pt-[min(15vw,60px)] ${isPremiumPage ? "" : "pb-[min(18vw,72px)] overflow-y-auto"}`}>
           {children}
@@ -62,6 +64,7 @@ export function ClientApp({ children }: { children: ReactNode }) {
 
   return (
     <SidebarProvider className="app-shell sidebar-glass">
+      <InstallPWA />
       <AppSidebar theme={theme} toggleTheme={toggleTheme} />
       <div className="flex-1 overflow-auto">
         {children}
