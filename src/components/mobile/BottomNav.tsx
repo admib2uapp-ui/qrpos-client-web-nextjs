@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calculator, Activity, Home, User, Settings } from "lucide-react";
+import { History, User, Settings, Activity, Home } from "lucide-react";
 
 const navItems = [
-  { path: "/mobile/calculator", label: "Calculator", icon: Calculator },
-  { path: "/mobile/activity", label: "Activity", icon: Activity },
-  { path: "/summary", label: "Summary", icon: Home },
   { path: "/profile", label: "Profile", icon: User },
+  { path: "/summary", label: "Summary", icon: Activity },
+  { path: "/mobile/calculator", label: "Home", icon: Home },
+  { path: "/mobile/activity", label: "History", icon: History },
   { path: "/settings", label: "Settings", icon: Settings },
 ];
 
