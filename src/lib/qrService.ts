@@ -73,7 +73,7 @@ export async function initiateTransaction(amount: number, manualRef: string | nu
 /**
  * Fetches the QR image from the proxy API
  */
-export async function generateQRData(amount: string, transaction: DbTransaction, userId: string): Promise<string> {
+export async function generateQRData(amount: string, transaction: DbTransaction, userId: string): Promise<{ image: string; reference: string }> {
   // 1. Fetch merchant details
   const merchant = await fetchMerchantDetails(userId);
   if (!merchant) {
@@ -121,5 +121,5 @@ export async function generateQRData(amount: string, transaction: DbTransaction,
       .eq('id', transaction.id);
   }
 
-  return image;
+  return { image, reference: reference || transaction.reference_no };
 }

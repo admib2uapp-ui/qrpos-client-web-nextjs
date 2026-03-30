@@ -58,8 +58,11 @@ export function MobileQRDisplay() {
       setIsGenerating(true);
       setError(null);
       try {
-        const base64 = await generateQRData(amount, transaction, user.id);
-        setQrBase64(base64);
+        const { image, reference } = await generateQRData(amount, transaction, user.id);
+        setQrBase64(image);
+        if (reference && reference !== transaction.reference_no) {
+          setTransaction((prev: any) => prev ? { ...prev, reference_no: reference } : null);
+        }
       } catch (err: any) {
         console.error('Failed to generate QR:', err);
         setError(err.message || 'Failed to generate QR code');

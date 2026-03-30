@@ -35,8 +35,11 @@ export default function QRRegistrationPage() {
       setCurrentTx({ amount, ref: transaction.reference_no });
 
       // 2. QR Generation
-      const base64 = await generateQRData(amount, transaction, user.id);
-      setQrBase64(base64);
+      const { image, reference } = await generateQRData(amount, transaction, user.id);
+      setQrBase64(image);
+      if (reference && reference !== transaction.reference_no) {
+        setCurrentTx((prev: any) => prev ? { ...prev, ref: reference } : null);
+      }
     } catch (err: any) {
       console.error("Error generating QR:", err);
       setError(err.message || "Failed to generate QR code");
