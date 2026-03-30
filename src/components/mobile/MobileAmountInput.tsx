@@ -169,8 +169,8 @@ export function MobileAmountInput() {
     }
     setIsSubmitting(true);
     try {
-      const referenceNo = await initiateTransaction(amountNum, manualRef || null, auth.user.id);
-      router.push(`/mobile/qr?amount=${encodeURIComponent(displayValue)}&ref=${encodeURIComponent(referenceNo)}`);
+      const transaction = await initiateTransaction(amountNum, manualRef || null, auth.user.id);
+      router.push(`/mobile/qr?amount=${encodeURIComponent(displayValue)}&id=${transaction.id}`);
     } catch (error) {
       console.error('Failed to create transaction:', error);
       router.push(`/mobile/qr?amount=${encodeURIComponent(displayValue)}`);
@@ -258,7 +258,7 @@ export function MobileAmountInput() {
           >
              <input 
                type="text" 
-               placeholder="ENTER REFERENCE NO"
+               placeholder="ENTER INVOICE NO"
                value={manualRef}
                onChange={(e) => setManualRef(e.target.value.toUpperCase())}
                className={`w-full bg-secondary/50 border rounded-xl px-4 py-[1.2vh] text-center text-[2.8vw] sm:text-[10px] font-bold tracking-widest text-primary focus:bg-secondary outline-none transition-all placeholder:text-muted-foreground/30 ${focusedField === 'ref' ? "border-primary ring-2 ring-primary/40 shadow-sm" : "border-border"}`}
@@ -276,7 +276,7 @@ export function MobileAmountInput() {
             onClick={() => setShowRefInput(!showRefInput)}
             className="bg-secondary/20 dark:bg-white/5 backdrop-blur-md rounded-full px-[3vw] py-[1.2vw] text-[2.5vw] sm:text-[10px] font-bold text-primary uppercase tracking-wider transition-all border border-border/20 shadow-sm"
           >
-            {manualRef ? `REF: ${manualRef}` : "+ ADD REF"}
+            {manualRef ? `INV: ${manualRef}` : "+ ADD INVOICE"}
           </button>
 
           <div className="bg-secondary/20 dark:bg-white/5 p-[0.6vw] rounded-full flex gap-[1vw] border border-border/20 backdrop-blur-sm shadow-sm transition-all overflow-hidden">

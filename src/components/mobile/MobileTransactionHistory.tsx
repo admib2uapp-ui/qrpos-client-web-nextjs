@@ -52,7 +52,7 @@ export function MobileTransactionHistory() {
     if (!q) return filtered;
 
     return filtered.filter((t) => {
-      const ref = (t.reference_number || t.reference_no || "").toLowerCase();
+      const ref = (t.invoice_number || t.reference_no || "").toLowerCase();
       const amtRaw = String(t.amount || "");
       const amtClean = amtRaw.replace(/[,\s]/g, "");
       return ref.includes(q) || amtRaw.includes(q) || amtClean.includes(q);
@@ -195,7 +195,7 @@ export function MobileTransactionHistory() {
                       </div>
                       <div className="flex flex-col gap-[0.5vw]">
                         <p className="text-[3.5vw] sm:text-sm font-black text-foreground tracking-tight underline decoration-muted-foreground/10">
-                          REF: {highlightText(tx.reference_number || tx.reference_no || "", searchQuery)}
+                          INV: {highlightText(tx.invoice_number || tx.reference_no || "", searchQuery)}
                         </p>
                         <p className="text-[2.2vw] sm:text-[9px] uppercase font-black text-muted-foreground/40 tracking-wider">
                           {tx.created_at ? format(new Date(tx.created_at), "MMM dd, HH:mm:ss") : 'N/A'}

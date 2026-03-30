@@ -12,13 +12,15 @@ export function MobileQRDisplay() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const txId = searchParams.get("id") || "";
+  const [transaction, setTransaction] = useState<any>(null);
   const [qrBase64, setQrBase64] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(true);
   const amount = searchParams.get("amount") || "0";
-  const refNo = searchParams.get("ref") || "";
 
-  const { isSuccess } = useTransactionStatus(refNo, amount);
+  // Use the reference from the transaction object for status checking
+  const { isSuccess } = useTransactionStatus(transaction?.reference_no || "", amount);
 
   useEffect(() => {
     if (isSuccess) {
@@ -29,13 +31,34 @@ export function MobileQRDisplay() {
     }
   }, [isSuccess, router]);
 
+  // 1. Fetch transaction details
   useEffect(() => {
-    if (!user) return;
+    if (!txId) return;
+    const fetchTx = async () => {
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('id', txId)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching transaction:', error);
+        setError('Transaction not found');
+        return;
+      }
+      setTransaction(data);
+    };
+    fetchTx();
+  }, [txId]);
+
+  // 2. Generate QR once transaction is loaded
+  useEffect(() => {
+    if (!user || !transaction) return;
     const fetchQR = async () => {
       setIsGenerating(true);
       setError(null);
       try {
-        const base64 = await generateQRData(amount, refNo, user.id);
+        const base64 = await generateQRData(amount, transaction, user.id);
         setQrBase64(base64);
       } catch (err: any) {
         console.error('Failed to generate QR:', err);
@@ -45,7 +68,7 @@ export function MobileQRDisplay() {
       }
     };
     fetchQR();
-  }, [user, amount, refNo]);
+  }, [user, amount, transaction]);
 
   const formatAmount = (value: string) => {
     const num = parseFloat(value);
@@ -89,7 +112,7 @@ export function MobileQRDisplay() {
       
       const link = document.createElement('a');
       link.href = dataUrl;
-      link.download = `LankaQR_${refNo || Date.now()}.png`;
+      link.download = `LankaQR_${transaction?.reference_no || Date.now()}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -107,7 +130,7 @@ export function MobileQRDisplay() {
       
       const res = await fetch(dataUrl);
       const blob = await res.blob();
-      const fileName = `LankaQR_${refNo || 'Payment'}.png`;
+      const fileName = `LankaQR_${transaction?.reference_no || 'Payment'}.png`;
       const file = new File([blob], fileName, { type: 'image/png' });
 
       // Robust feature detection for file sharing
@@ -125,7 +148,7 @@ export function MobileQRDisplay() {
         // Fallback to text/url if file sharing not possible
         await navigator.share({
           title: 'LankaQR Payment',
-          text: `Scan to pay LKR ${formatAmount(amount)} (Ref: ${refNo})`,
+          text: `Scan to pay LKR ${formatAmount(amount)} (Ref: ${transaction?.reference_no || 'N/A'})`,
           url: window.location.href
         });
       } else {

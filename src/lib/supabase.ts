@@ -183,6 +183,7 @@ export interface DbTransaction {
   local_id: string | null;
   merchant_id: string | null;
   reference_no: string;
+  invoice_no: string | null;
   amount: number;
   status: string;
   sms_content: string | null;
@@ -198,6 +199,7 @@ export interface CompletedTransaction {
   local_id: string | null;
   merchant_id: string | null;
   reference_no: string;
+  invoice_no: string | null;
   amount: number;
   tag: string | null;
   created_at: string;
@@ -212,6 +214,7 @@ export interface CancelledTransaction {
   local_id: string | null;
   merchant_id: string | null;
   reference_no: string;
+  invoice_no: string | null;
   amount: number;
   tag: string | null;
   created_at: string;
@@ -280,7 +283,7 @@ export const fetchAllTransactions = async (merchantId?: string) => {
     const mapPending = (t: DbTransaction, idx: number) => ({
       transaction_uuid: `pending-${t.id}-${idx}`,
       transaction_id: t.local_id || t.id.slice(0, 8),
-      reference_number: t.reference_no,
+      invoice_number: t.invoice_no || t.reference_no,
       amount: t.amount.toString(),
       currency: 'LKR',
       status: t.status === 'pending' ? 'PENDING' : t.status === 'completed' ? 'SUCCESS' : 'FAILED',
@@ -290,7 +293,7 @@ export const fetchAllTransactions = async (merchantId?: string) => {
     const mapCompleted = (t: CompletedTransaction, idx: number) => ({
       transaction_uuid: `completed-${t.id}-${idx}`,
       transaction_id: t.local_id || t.id.slice(0, 8),
-      reference_number: t.reference_no,
+      invoice_number: t.invoice_no || t.reference_no,
       amount: t.amount.toString(),
       currency: 'LKR',
       status: 'SUCCESS' as const,
@@ -300,7 +303,7 @@ export const fetchAllTransactions = async (merchantId?: string) => {
     const mapCancelled = (t: CancelledTransaction, idx: number) => ({
       transaction_uuid: `cancelled-${t.id}-${idx}`,
       transaction_id: t.local_id || t.id.slice(0, 8),
-      reference_number: t.reference_no,
+      invoice_number: t.invoice_no || t.reference_no,
       amount: t.amount.toString(),
       currency: 'LKR',
       status: 'FAILED' as const,
@@ -325,6 +328,7 @@ export const fetchAllTransactions = async (merchantId?: string) => {
 export const createTransaction = async (
   amount: number,
   referenceNo: string,
+  invoiceNo: string | null,
   merchantId?: string
 ) => {
   const { data, error } = await supabase
@@ -332,6 +336,7 @@ export const createTransaction = async (
     .insert({
       merchant_id: merchantId,
       reference_no: referenceNo,
+      invoice_no: invoiceNo,
       amount: amount,
       status: 'pending',
       created_at: new Date().toISOString(),
@@ -375,6 +380,7 @@ export const completeTransaction = async (
     .insert({
       merchant_id: tx.merchant_id,
       reference_no: tx.reference_no,
+      invoice_no: tx.invoice_no,
       amount: verifiedAmount || tx.amount,
       local_id: tx.local_id,
       tag: tx.tag,

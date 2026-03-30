@@ -1,7 +1,7 @@
 export interface Transaction {
   transaction_uuid: string;
   transaction_id: string;
-  reference_number: string;
+  invoice_number: string;
   amount: string;
   currency: string;
   status: 'SUCCESS' | 'FAILED' | 'PENDING';
@@ -14,7 +14,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
   {
     transaction_uuid: '1',
     transaction_id: 'TXN-1001',
-    reference_number: 'REF-001',
+    invoice_number: 'REF-001',
     amount: '1500.00',
     currency: 'LKR',
     status: 'SUCCESS',
@@ -25,7 +25,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
   {
     transaction_uuid: '2',
     transaction_id: 'TXN-1002',
-    reference_number: 'REF-002',
+    invoice_number: 'REF-002',
     amount: '250.50',
     currency: 'LKR',
     status: 'SUCCESS',
@@ -36,7 +36,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
   {
     transaction_uuid: '3',
     transaction_id: 'TXN-1003',
-    reference_number: 'REF-003',
+    invoice_number: 'REF-003',
     amount: '4200.00',
     currency: 'LKR',
     status: 'PENDING',
@@ -47,7 +47,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
   {
     transaction_uuid: '4',
     transaction_id: 'TXN-1004',
-    reference_number: 'REF-004',
+    invoice_number: 'REF-004',
     amount: '95.00',
     currency: 'LKR',
     status: 'FAILED',
@@ -58,7 +58,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
   {
     transaction_uuid: '5',
     transaction_id: 'TXN-1005',
-    reference_number: 'REF-005',
+    invoice_number: 'REF-005',
     amount: '12000.00',
     currency: 'LKR',
     status: 'SUCCESS',
@@ -69,7 +69,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
   {
     transaction_uuid: '6',
     transaction_id: 'TXN-1006',
-    reference_number: 'REF-006',
+    invoice_number: 'REF-006',
     amount: '500.00',
     currency: 'LKR',
     status: 'SUCCESS',

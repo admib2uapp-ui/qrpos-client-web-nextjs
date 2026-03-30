@@ -26,10 +26,11 @@ export async function POST(request: Request) {
     }
 
     const contentType = response.headers.get("content-type");
+    let jsonData: any = null;
     let base64Image = "";
 
     if (contentType && contentType.includes("application/json")) {
-      const jsonData = await response.json();
+      jsonData = await response.json();
       base64Image = jsonData.base64 || jsonData.image || jsonData.qr_code || JSON.stringify(jsonData);
       console.log("QR API Response parsed as JSON");
     } else {
@@ -45,21 +46,20 @@ export async function POST(request: Request) {
     }
 
     // If it's still JSON-like (starts with {), try to extract base64 again
-    if (base64Image.startsWith('{')) {
+    if (base64Image.startsWith('{') && !jsonData) {
       try {
-        const parsed = JSON.parse(base64Image);
-        base64Image = parsed.base64 || parsed.image || parsed.qr_code || base64Image;
+        jsonData = JSON.parse(base64Image);
+        base64Image = jsonData.base64 || jsonData.image || jsonData.qr_code || base64Image;
       } catch (e) {
-        // Not valid JSON, keep as is
+        // Not valid JSON
       }
     }
 
-    console.log("QR API Final Base64 length:", base64Image.length);
-    console.log("QR API Final Base64 start:", base64Image.substring(0, 50));
+    const reference = jsonData?.reference || jsonData?.reference_number || jsonData?.reference_no || jsonData?.id || null;
 
-    return new NextResponse(base64Image, {
-      status: 200,
-      headers: { "Content-Type": "text/plain" },
+    return NextResponse.json({
+      image: base64Image,
+      reference: reference,
     });
   } catch (error: any) {
     console.error("API Route Error:", error);

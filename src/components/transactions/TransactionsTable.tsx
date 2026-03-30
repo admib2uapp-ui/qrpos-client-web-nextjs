@@ -28,7 +28,7 @@ export default function TransactionsTable() {
     return transactions.filter(tx => {
       const searchMatch = searchTerm === '' ||
         tx.amount.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tx.reference_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tx.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
         tx.transaction_id.toLowerCase().includes(searchTerm.toLowerCase());
 
       if (statusFilter !== 'ALL' && tx.status !== statusFilter) return false;
@@ -59,7 +59,7 @@ export default function TransactionsTable() {
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by amount, ref no..."
+                placeholder="Search by amount, invoice..."
                 className="pl-9 h-10 border-sidebar-border/50"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -93,7 +93,7 @@ export default function TransactionsTable() {
                 <TableRow className="border-sidebar-border/30">
                   <TableHead className="font-semibold text-foreground">Date</TableHead>
                   <TableHead className="font-semibold text-foreground">Amount</TableHead>
-                  <TableHead className="font-semibold text-foreground">Reference No</TableHead>
+                  <TableHead className="font-semibold text-foreground">Invoice</TableHead>
                   <TableHead className="text-right font-semibold text-foreground">Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -112,7 +112,7 @@ export default function TransactionsTable() {
                     <TableRow key={tx.transaction_uuid} className="border-sidebar-border/20 hover:bg-sidebar/30 transition-colors">
                       <TableCell className="text-muted-foreground">{format(new Date(tx.created_at), 'Pp')}</TableCell>
                       <TableCell className="font-medium">{parseFloat(tx.amount).toFixed(2)} {tx.currency}</TableCell>
-                      <TableCell className="font-mono text-xs">{tx.reference_number}</TableCell>
+                      <TableCell className="font-mono text-xs">{tx.invoice_number}</TableCell>
                       <TableCell className="text-right">
                         <Badge variant={getStatusVariant(tx.status)} className="rounded-full px-3">{tx.status}</Badge>
                       </TableCell>

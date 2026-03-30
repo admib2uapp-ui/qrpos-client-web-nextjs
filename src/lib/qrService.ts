@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchMerchantDetails, supabase, createTransaction } from './supabase';
+import { fetchMerchantDetails, supabase, createTransaction, DbTransaction } from './supabase';
 
 export interface QRRequestPayload {
   merchant_id: string;
@@ -12,7 +12,8 @@ export interface QRRequestPayload {
   country_code: string;
   bank_code: string;
   terminal_id: string;
-  reference_number: string;
+  invoice_number: string;
+  callback_url?: string;
 }
 
 /**
@@ -55,24 +56,24 @@ export async function generateReferenceNumber(): Promise<string> {
 /**
  * Initiates a transaction by saving it to Supabase
  */
-export async function initiateTransaction(amount: number, manualRef: string | null, userId: string): Promise<string> {
+export async function initiateTransaction(amount: number, manualRef: string | null, userId: string): Promise<DbTransaction> {
   const merchant = await fetchMerchantDetails(userId);
   if (!merchant) {
     throw new Error('Merchant profile not found');
   }
 
-  const referenceNo = manualRef || await generateReferenceNumber();
+  const tempRef = await generateReferenceNumber();
   
   // Save to transactions table
-  await createTransaction(amount, referenceNo, merchant.id);
+  const transaction = await createTransaction(amount, tempRef, manualRef, merchant.id);
   
-  return referenceNo;
+  return transaction;
 }
 
 /**
  * Fetches the QR image from the proxy API
  */
-export async function generateQRData(amount: string, referenceNo: string, userId: string): Promise<string> {
+export async function generateQRData(amount: string, transaction: DbTransaction, userId: string): Promise<string> {
   // 1. Fetch merchant details
   const merchant = await fetchMerchantDetails(userId);
   if (!merchant) {
@@ -90,7 +91,8 @@ export async function generateQRData(amount: string, referenceNo: string, userId
     country_code: merchant.country_code || 'LK',
     bank_code: merchant.bank_code,
     terminal_id: merchant.terminal_id,
-    reference_number: referenceNo
+    invoice_number: transaction.invoice_no || '',
+    callback_url: 'https://qrpos-nextjs.vercel.app/api/verify'
   };
 
   // 3. Call the INTERNAL API proxy
@@ -107,22 +109,17 @@ export async function generateQRData(amount: string, referenceNo: string, userId
     throw new Error(errorData.error || `QR Generation failed: ${response.status}`);
   }
 
-  // Normalize the base64 string
-  let base64Image = await response.text();
-  base64Image = base64Image.trim();
-  
-  if (base64Image.startsWith('"') && base64Image.endsWith('"')) {
-    base64Image = base64Image.slice(1, -1);
+  // 4. Parse the JSON response
+  const data = await response.json();
+  const { image, reference } = data;
+
+  // 5. If the worker returned a new reference number, update the transaction record
+  if (reference && reference !== transaction.reference_no) {
+    await supabase
+      .from('transactions')
+      .update({ reference_no: reference })
+      .eq('id', transaction.id);
   }
 
-  if (base64Image.startsWith('{')) {
-    try {
-      const parsed = JSON.parse(base64Image);
-      base64Image = parsed.base64 || parsed.image || parsed.qr_code || base64Image;
-    } catch (e) {
-      // Not valid JSON
-    }
-  }
-
-  return base64Image;
+  return image;
 }
