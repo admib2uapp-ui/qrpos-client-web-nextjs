@@ -67,6 +67,20 @@ export function MobileTransactionHistory() {
     return amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
+  const highlightText = (text: string, query: string) => {
+    if (!query.trim()) return text;
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return (
+      <>
+        {parts.map((part, i) => 
+          part.toLowerCase() === query.toLowerCase() 
+            ? <span key={i} className="bg-primary/30 text-primary rounded-sm px-0.5">{part}</span> 
+            : part
+        )}
+      </>
+    );
+  };
+
   return (
     <div className="flex flex-col h-full bg-background transition-colors duration-300">
 
@@ -181,7 +195,7 @@ export function MobileTransactionHistory() {
                       </div>
                       <div className="flex flex-col gap-[0.5vw]">
                         <p className="text-[3.5vw] sm:text-sm font-black text-foreground tracking-tight underline decoration-muted-foreground/10">
-                          REF: {tx.reference_number || tx.reference_no}
+                          REF: {highlightText(tx.reference_number || tx.reference_no || "", searchQuery)}
                         </p>
                         <p className="text-[2.2vw] sm:text-[9px] uppercase font-black text-muted-foreground/40 tracking-wider">
                           {tx.created_at ? format(new Date(tx.created_at), "MMM dd, HH:mm:ss") : 'N/A'}
@@ -196,7 +210,7 @@ export function MobileTransactionHistory() {
                             : "text-muted-foreground/30"
                         }`}
                       >
-                        LKR {formatAmount(parseFloat(tx.amount || 0))}
+                        LKR {highlightText(formatAmount(parseFloat(tx.amount || 0)), searchQuery)}
                       </p>
                       <span
                         className="inline-block px-[2vw] py-[0.5vw] rounded-full text-[2vw] sm:text-[8px] font-black uppercase tracking-[0.2em] border border-white/5 opacity-80"
