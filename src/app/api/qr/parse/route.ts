@@ -21,7 +21,7 @@ export async function POST(request: Request) {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ payload }),
+      body: JSON.stringify({ payload, full_details: true, no_kv: true }),
     });
 
     if (!response.ok) {
