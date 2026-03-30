@@ -54,37 +54,77 @@ export function MobileQRDisplay() {
     return `${parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}.${parts[1]}`;
   };
 
+  const svgToPng = (svgData: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const svgUrl = svgData.startsWith('data:') ? svgData : `data:image/svg+xml;base64,${btoa(svgData)}`;
+      
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        // Increase resolution for better quality
+        const scale = 4;
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Failed to get canvas context'));
+          return;
+        }
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = () => reject(new Error('Failed to load SVG for conversion'));
+      img.src = svgUrl;
+    });
+  };
+
   const handleDownload = async () => {
     if (!qrBase64) return;
     try {
+      // Check if it's an SVG and convert if necessary
+      const isSvg = qrBase64.includes('<svg') || qrBase64.includes('image/svg+xml');
+      const dataUrl = isSvg ? await svgToPng(qrBase64) : (qrBase64.startsWith('data:') ? qrBase64 : `data:image/png;base64,${qrBase64}`);
+      
       const link = document.createElement('a');
-      link.href = qrBase64.startsWith('data:') ? qrBase64 : `data:image/png;base64,${qrBase64}`;
+      link.href = dataUrl;
       link.download = `LankaQR_${refNo || Date.now()}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (err) {
       console.error('Download failed:', err);
+      alert('Failed to save image. Please try taking a screenshot.');
     }
   };
 
   const handleShare = async () => {
     if (!qrBase64) return;
     try {
-      const dataUrl = qrBase64.startsWith('data:') ? qrBase64 : `data:image/png;base64,${qrBase64}`;
+      const isSvg = qrBase64.includes('<svg') || qrBase64.includes('image/svg+xml');
+      const dataUrl = isSvg ? await svgToPng(qrBase64) : (qrBase64.startsWith('data:') ? qrBase64 : `data:image/png;base64,${qrBase64}`);
+      
       const res = await fetch(dataUrl);
       const blob = await res.blob();
-      const file = new File([blob], `LankaQR_${refNo || 'Payment'}.png`, { type: 'image/png' });
+      const fileName = `LankaQR_${refNo || 'Payment'}.png`;
+      const file = new File([blob], fileName, { type: 'image/png' });
 
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      // Robust feature detection for file sharing
+      const canShareFiles = typeof navigator !== 'undefined' && 
+                          typeof navigator.canShare === 'function' && 
+                          navigator.canShare({ files: [file] });
+
+      if (canShareFiles && typeof navigator.share === 'function') {
         await navigator.share({
           files: [file],
-          title: 'Payment QR',
+          title: 'LankaQR Payment',
           text: `Scan to pay LKR ${formatAmount(amount)}`,
         });
-      } else if (navigator.share) {
+      } else if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+        // Fallback to text/url if file sharing not possible
         await navigator.share({
-          title: 'Payment QR',
+          title: 'LankaQR Payment',
           text: `Scan to pay LKR ${formatAmount(amount)} (Ref: ${refNo})`,
           url: window.location.href
         });
@@ -94,7 +134,7 @@ export function MobileQRDisplay() {
       }
     } catch (err) {
       console.error('Share failed:', err);
-      // Fallback: Copy link
+      // Final fallback: copy link
       navigator.clipboard.writeText(window.location.href);
       alert('Link copied to clipboard!');
     }
