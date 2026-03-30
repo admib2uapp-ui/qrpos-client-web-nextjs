@@ -1,5 +1,13 @@
 import { createClient, type User, type Session } from '@supabase/supabase-js';
 
+export type Profile = {
+  id: string;
+  full_name: string | null;
+  company_name: string | null;
+  whatsapp_number: string | null;
+  updated_at: string;
+};
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -47,6 +55,32 @@ export interface Merchant {
   referral_points: number;
   referred_by_code: string | null;
 }
+
+export const fetchProfile = async (userId: string): Promise<Profile | null> => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  if (error) return null;
+  return data;
+};
+
+export const updateProfile = async (userId: string, profile: Partial<Profile>): Promise<Profile> => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .upsert({
+      id: userId,
+      ...profile,
+      updated_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
 
 export const fetchMerchantDetails = async (userId: string): Promise<Merchant | null> => {
   const { data, error } = await supabase

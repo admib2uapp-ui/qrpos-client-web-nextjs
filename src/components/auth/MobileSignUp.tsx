@@ -9,6 +9,9 @@ import { Input } from "@/components/ui/input";
 
 export function MobileSignUp() {
   const router = useRouter();
+  const [fullName, setFullName] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [whatsappNumber, setWhatsappNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -21,7 +24,7 @@ export function MobileSignUp() {
     e.preventDefault();
     setError("");
 
-    if (!email || !password || !confirmPassword) {
+    if (!email || !password || !confirmPassword || !fullName || !companyName || !whatsappNumber) {
       setError("Complete all fields");
       return;
     }
@@ -42,6 +45,13 @@ export function MobileSignUp() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName,
+            company_name: companyName,
+            whatsapp_number: whatsappNumber,
+          }
+        }
       });
 
       if (error) throw error;
@@ -103,6 +113,42 @@ export function MobileSignUp() {
           )}
 
           <form onSubmit={handleSignUp} className="space-y-[4vw]">
+            <div className="space-y-[1.5vw]">
+              <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Full Name</label>
+              <Input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="John Doe"
+                className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
+                required
+              />
+            </div>
+
+            <div className="space-y-[1.5vw]">
+              <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Company Name</label>
+              <Input
+                type="text"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                placeholder="Lanka Solutions PBC"
+                className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
+                required
+              />
+            </div>
+
+            <div className="space-y-[1.5vw]">
+              <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">WhatsApp Number</label>
+              <Input
+                type="tel"
+                value={whatsappNumber}
+                onChange={(e) => setWhatsappNumber(e.target.value)}
+                placeholder="+94 77 123 4567"
+                className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
+                required
+              />
+            </div>
+
             <div className="space-y-[1.5vw]">
               <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Email Address</label>
               <Input
