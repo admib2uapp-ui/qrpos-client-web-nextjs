@@ -1,23 +1,34 @@
 import { NextResponse } from "next/server";
+import { generateHMAC } from "@/lib/crypto";
 
-const QR_API_URL = 'https://b2uqr.qr4pos.com/generate';
+// Use local worker URL for development
+const QR_API_URL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:8788/generate' 
+  : 'https://b2uqr.qr4pos.com/generate';
 
 export async function POST(request: Request) {
   try {
     const apiKey = process.env.QR_SERVICE_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ error: "QR Service API Key is not configured on the server" }, { status: 500 });
+    const secret = process.env.QR_SERVICE_SECRET_KEY;
+
+    if (!apiKey || !secret) {
+      return NextResponse.json({ error: "QR Service configuration is missing on the server" }, { status: 500 });
     }
 
     const payload = await request.json();
+    const payloadString = JSON.stringify(payload);
+
+    // Generate HMAC signature for the outbound request
+    const signature = generateHMAC(payloadString, secret);
 
     const response = await fetch(QR_API_URL, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
+        "x-signature": signature
       },
-      body: JSON.stringify(payload),
+      body: payloadString,
     });
 
     if (!response.ok) {

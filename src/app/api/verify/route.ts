@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { verifyHMAC } from '@/lib/crypto';
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
+    const rawBody = await request.text();
+    const data = JSON.parse(rawBody);
+    
     console.log('Verification Request Received:', {
       url: request.url,
       method: request.method,
@@ -13,13 +16,31 @@ export async function POST(request: Request) {
 
     const authHeader = request.headers.get('Authorization');
     const apiKey = authHeader ? authHeader.split(' ')[1] : null;
+    const signature = request.headers.get('x-signature');
 
-    // Use a server-side secret for verification
-    const validApiKey = process.env.VERIFICATION_API_KEY;
+    const validApiKey = process.env.VERIFICATION_API_KEY || process.env.QR_SERVICE_API_KEY;
+    const secret = process.env.QR_SERVICE_SECRET_KEY;
 
+    // 1. Basic API Key Check
     if (!apiKey || apiKey !== validApiKey) {
-      console.warn('Unauthorized Verification Attempt');
-      return NextResponse.json({ status: 'ERROR', message: 'Unauthorized' }, { status: 401 });
+      console.warn('Unauthorized Verification Attempt: Invalid API Key');
+      return NextResponse.json({ status: 'ERROR', message: 'Unauthorized (1)' }, { status: 401 });
+    }
+
+    // 2. HMAC Signature Verification
+    if (secret) {
+        if (!signature) {
+            console.warn('Unauthorized Verification Attempt: Missing Signature');
+            return NextResponse.json({ status: 'ERROR', message: 'Unauthorized (2)' }, { status: 401 });
+        }
+
+        const isSignatureValid = verifyHMAC(rawBody, signature, secret);
+        if (!isSignatureValid) {
+            console.warn('Unauthorized Verification Attempt: Invalid Signature');
+            return NextResponse.json({ status: 'ERROR', message: 'Unauthorized (3)' }, { status: 401 });
+        }
+        
+        console.log('HMAC Signature Verified [SECURE]');
     }
 
     const { reference, status, amount, invoice_number, transkey, originalkey, rvslflag, debitcredit } = data;
