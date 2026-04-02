@@ -169,6 +169,14 @@ export function MobileAmountInput() {
     }
     setIsSubmitting(true);
     try {
+      // "Prime" the speech engine immediately on user gesture to unlock mobile/Brave audio
+      // This is necessary because browsers block background speech unless the first one is part of a click
+      try {
+        const prime = new SpeechSynthesisUtterance("");
+        prime.volume = 0;
+        window.speechSynthesis.speak(prime);
+      } catch (e) {}
+
       const transaction = await initiateTransaction(amountNum, manualRef || null, auth.user.id);
       router.push(`/mobile/qr?amount=${encodeURIComponent(displayValue)}&id=${transaction.id}`);
     } catch (error) {
