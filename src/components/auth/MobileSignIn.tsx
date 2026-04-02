@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
-import { Loader2, Mail, Lock, Eye, EyeOff, QrCode } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -39,11 +39,11 @@ export function MobileSignIn() {
     <div className="flex flex-col min-h-[100svh] h-[100svh] bg-background transition-colors duration-300 overflow-y-auto">
       {/* Brand Section - Dynamically scaling based on viewport height */}
       <div className="flex flex-col items-center justify-center pt-[4vh] pb-[3vh] px-[10vw] flex-shrink-0">
-        <div className="w-[12vh] h-[12vh] max-w-[80px] max-h-[80px] rounded-[5vw] bg-primary flex items-center justify-center shadow-2xl shadow-primary/30 mb-[3vh] relative overflow-hidden group">
-          <div className="absolute inset-0 bg-white/20 skew-x-[-20deg] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-          <QrCode className="w-[6vh] h-[6vh] max-w-[40px] max-h-[40px] text-white" />
+        <div className="w-[12vh] h-[12vh] max-w-[80px] max-h-[80px] rounded-2xl bg-white flex items-center justify-center shadow-2xl flex-shrink-0 border border-white/5 p-1 mb-[3vh] relative overflow-hidden group">
+          <div className="absolute inset-0 bg-primary/10 skew-x-[-20deg] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+          <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
         </div>
-        <h1 className="text-[5vh] max-text-3xl font-black text-foreground tracking-tighter tabular-nums leading-none">QR POS</h1>
+        <h1 className="text-[5vh] max-text-3xl font-black text-foreground tracking-tighter tabular-nums leading-none">QR <span className="text-primary tracking-normal">POS</span></h1>
         <p className="text-[1.5vh] max-text-sm font-black text-muted-foreground/40 uppercase tracking-[0.4em] mt-[1.5vh]">Premium QR Payments</p>
       </div>
 
