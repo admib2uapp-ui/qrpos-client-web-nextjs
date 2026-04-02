@@ -54,6 +54,7 @@ export interface Merchant {
   referral_code: string | null;
   referral_points: number;
   referred_by_code: string | null;
+  sequence: number | null;
 }
 
 export const fetchProfile = async (userId: string): Promise<Profile | null> => {

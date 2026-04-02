@@ -79,8 +79,8 @@ export function MerchantMomentumCard({ transactions }: { transactions: any[] }) 
         </div>
       </CardHeader>
       <CardContent className="pt-2 pb-6">
-        <div className="h-[500px] w-full mt-2">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[500px] w-full mt-2 overflow-hidden">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={150}>
             <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
               <XAxis 
