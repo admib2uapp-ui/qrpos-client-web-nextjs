@@ -92,7 +92,9 @@ export async function generateQRData(amount: string, transaction: DbTransaction,
     bank_code: merchant.bank_code,
     terminal_id: merchant.terminal_id,
     invoice_number: transaction.invoice_no || '',
-    callback_url: 'https://qrpos-nextjs.vercel.app/api/verify'
+    callback_url: process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:3000/api/verify' 
+      : 'https://qrpos-nextjs.vercel.app/api/verify'
   };
 
   // 3. Call the INTERNAL API proxy

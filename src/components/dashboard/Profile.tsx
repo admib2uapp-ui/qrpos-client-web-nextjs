@@ -83,7 +83,7 @@ export default function ProfileComponent() {
   return (
     <div className="space-y-[6vw] sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-[10vw] sm:pb-0">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-[6vw] sm:gap-6">
-        <Card className="lg:col-span-1 h-fit rounded-[4vw] sm:rounded-xl overflow-hidden border-border/40 shadow-sm relative group">
+        <Card className="lg:col-span-1 h-fit glass-card border-primary/10 overflow-hidden relative group shadow-xl shadow-primary/5">
           <Button 
             variant="ghost" 
             size="icon" 
@@ -92,35 +92,35 @@ export default function ProfileComponent() {
             <Pencil className="w-4 h-4 text-primary" />
           </Button>
           <CardContent className="pt-[8vw] sm:pt-6 flex flex-col items-center text-center space-y-[4vw] sm:space-y-4">
-            <Avatar className="w-[24vw] h-[24vw] max-w-[96px] max-h-[96px] border-[1vw] sm:border-4 border-primary/20 shadow-xl">
+            <Avatar className="w-[24vw] h-[24vw] max-w-[110px] max-h-[110px] border-4 border-primary shadow-2xl shadow-primary/30">
               <AvatarImage src="" />
-              <AvatarFallback className="bg-primary/10 text-primary text-[8vw] sm:text-2xl font-bold font-mono">
+              <AvatarFallback className="bg-primary/10 text-primary text-3xl font-black font-mono">
                 {getInitials(fullName)}
               </AvatarFallback>
             </Avatar>
-            <div className="space-y-[1vw]">
-              <CardTitle className="text-[6vw] sm:text-xl font-black tracking-tight">{fullName || "User"}</CardTitle>
-              <CardDescription className="text-[3vw] sm:text-sm font-bold uppercase tracking-widest opacity-50">{profile?.company_name || "Merchant Admin"}</CardDescription>
+            <div className="space-y-1">
+              <CardTitle className="text-2xl font-black tracking-tight text-foreground">{fullName || "User"}</CardTitle>
+              <CardDescription className="text-xs font-black uppercase tracking-[0.2em] text-primary/60">{profile?.company_name || "Merchant Admin"}</CardDescription>
             </div>
             <div className="flex flex-col gap-[3vw] sm:gap-3 items-center w-full">
-              <Badge variant="outline" className="gap-[1vw] border-emerald-500/30 text-emerald-500 bg-emerald-500/5 px-[3vw] py-[1vw] text-[2.5vw] sm:text-xs font-bold uppercase tracking-widest">
-                <ShieldCheck className="w-[3vw] h-[3vw] max-w-[12px] max-h-[12px]" /> Verified
+              <Badge variant="outline" className="gap-2 border-primary/30 text-primary bg-primary/5 px-4 py-1.5 text-xs font-black uppercase tracking-widest rounded-full">
+                <ShieldCheck className="w-3.5 h-3.5" /> Verified Profile
               </Badge>
               <Button 
                 variant="ghost" 
                 onClick={() => signOut()}
-                className="gap-[2vw] sm:gap-2 text-rose-500 hover:text-rose-600 hover:bg-rose-500/5 transition-all text-[3vw] sm:text-xs font-bold uppercase tracking-widest mt-[2vw] sm:mt-2"
+                className="gap-2 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 transition-all text-xs font-black uppercase tracking-widest mt-4 rounded-xl px-6"
               >
-                <LogOut className="w-[4vw] h-[4vw] max-w-[14px] max-h-[14px]" /> Sign Out
+                <LogOut className="w-4 h-4" /> Sign Out
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2 rounded-[4vw] sm:rounded-xl overflow-hidden border-border/40 shadow-sm">
+        <Card className="lg:col-span-2 glass-card border-primary/10 overflow-hidden shadow-xl shadow-primary/5">
           <CardHeader className="p-[5vw] sm:p-6 pb-[2vw] sm:pb-4">
-            <CardTitle className="text-[5vw] sm:text-xl font-black tracking-tight underline decoration-primary/20">Personal Information</CardTitle>
-            <CardDescription className="text-[2.5vw] sm:text-xs uppercase tracking-widest font-bold opacity-40">Identity and contact details.</CardDescription>
+            <CardTitle className="text-xl font-black tracking-tight text-primary uppercase">Personal Information</CardTitle>
+            <CardDescription className="text-xs uppercase tracking-[0.2em] font-bold opacity-40">Identity and contact details.</CardDescription>
           </CardHeader>
           <CardContent className="p-[5vw] sm:p-6 pt-0 sm:pt-0 space-y-[6vw] sm:space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-[4vw] sm:gap-4">
@@ -132,14 +132,14 @@ export default function ProfileComponent() {
                   value={fullName} 
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Full Name"
-                  className="h-[12vw] sm:h-10 rounded-[2.5vw] sm:rounded-md bg-secondary/30 border-border/50 text-[3.5vw] sm:text-sm font-bold" 
+                  className="h-12 rounded-xl bg-primary/5 border-primary/10 text-sm font-black focus:ring-primary/20 transition-all" 
                 />
               </div>
               <div className="space-y-[2vw] sm:space-y-2">
                 <Label className="flex items-center gap-[2vw] sm:gap-2 text-[3vw] sm:text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
                    <Mail className="w-[4vw] h-[4vw] max-w-[16px] max-h-[16px]" /> Email Address
                 </Label>
-                <Input value={user?.email || ""} readOnly className="h-[12vw] sm:h-10 rounded-[2.5vw] sm:rounded-md bg-secondary/30 border-border/50 text-[3.5vw] sm:text-sm font-bold opacity-60 cursor-not-allowed" />
+                <Input value={user?.email || ""} readOnly className="h-12 rounded-xl bg-muted/10 border-muted/20 text-sm font-bold opacity-60 cursor-not-allowed" />
               </div>
               <div className="space-y-[2vw] sm:space-y-2">
                 <Label className="flex items-center gap-[2vw] sm:gap-2 text-[3vw] sm:text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
@@ -149,7 +149,7 @@ export default function ProfileComponent() {
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   placeholder="Company Name"
-                  className="h-[12vw] sm:h-10 rounded-[2.5vw] sm:rounded-md bg-secondary/30 border-border/50 text-[3.5vw] sm:text-sm font-bold" 
+                  className="h-12 rounded-xl bg-primary/5 border-primary/10 text-sm font-black focus:ring-primary/20 transition-all" 
                 />
               </div>
               <div className="space-y-[2vw] sm:space-y-2">
@@ -160,7 +160,7 @@ export default function ProfileComponent() {
                   value={whatsappNumber}
                   onChange={(e) => setWhatsappNumber(e.target.value)}
                   placeholder="+94 ..."
-                  className="h-[12vw] sm:h-10 rounded-[2.5vw] sm:rounded-md bg-secondary/30 border-border/50 text-[3.5vw] sm:text-sm font-bold" 
+                  className="h-12 rounded-xl bg-primary/5 border-primary/10 text-sm font-black focus:ring-primary/20 transition-all text-primary" 
                 />
               </div>
             </div>
@@ -177,14 +177,14 @@ export default function ProfileComponent() {
                   setCompanyName(profile?.company_name || "");
                   setWhatsappNumber(profile?.whatsapp_number || "");
                 }}
-                className="w-full sm:w-auto h-[10vw] sm:h-9 text-[2.8vw] sm:text-xs font-black uppercase tracking-widest rounded-full opacity-60"
+                className="w-full sm:w-auto h-12 text-xs font-black uppercase tracking-widest rounded-xl border-primary/10 hover:bg-primary/5 transition-all opacity-60"
               >
-                Discard
+                Discard Changes
               </Button>
               <Button 
                 onClick={handleUpdateProfile}
                 disabled={updating}
-                className="w-full sm:w-auto h-[12vw] sm:h-10 text-[3.5vw] sm:text-sm font-black uppercase tracking-widest rounded-full shadow-lg shadow-primary/20"
+                className="w-full sm:w-auto h-12 px-8 text-sm font-black uppercase tracking-widest rounded-xl shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-95"
               >
                 {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Update Profile"}
               </Button>

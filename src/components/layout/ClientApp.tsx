@@ -17,7 +17,7 @@ export function ClientApp({ children }: { children: ReactNode }) {
   const isMobile = useIsMobile();
   const { user, loading } = useAuth();
   const pathname = usePathname();
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -63,12 +63,22 @@ export function ClientApp({ children }: { children: ReactNode }) {
   }
 
   return (
-    <SidebarProvider className="app-shell sidebar-glass">
-      <InstallPWA />
-      <AppSidebar theme={theme} toggleTheme={toggleTheme} />
-      <div className="flex-1 overflow-auto">
-        {children}
+    <div className="relative h-screen flex overflow-hidden bg-background/50">
+      {/* Premium Desktop Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10 opacity-40 dark:opacity-70">
+        <div className="absolute top-[-10%] right-[-10%] w-[45%] h-[45%] bg-primary/15 rounded-full blur-[140px] animate-pulse" />
+        <div className="absolute bottom-[5%] left-[-15%] w-[55%] h-[55%] bg-emerald-600/10 rounded-full blur-[160px] animate-pulse [animation-delay:2s]" />
       </div>
-    </SidebarProvider>
+
+      <SidebarProvider className="app-shell sidebar-glass">
+        <InstallPWA />
+        <AppSidebar theme={theme} toggleTheme={toggleTheme} />
+        <main className="flex-1 overflow-auto relative z-10 backdrop-blur-[2px]">
+          <div className="p-4 md:p-8">
+            {children}
+          </div>
+        </main>
+      </SidebarProvider>
+    </div>
   );
 }

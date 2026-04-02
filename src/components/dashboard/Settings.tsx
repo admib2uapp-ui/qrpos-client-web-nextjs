@@ -66,6 +66,12 @@ export default function Settings() {
         throw new Error(result.error || "Failed to parse QR code");
       }
 
+      // Check if this merchant account is already linked
+      const isDuplicate = allMerchants.some(m => m.merchant_id === result.data.merchant_id);
+      if (isDuplicate) {
+        throw new Error("This merchant account is already linked to this service.");
+      }
+
       setQrResult(result.data);
     } catch (err: any) {
       setQrError(err.message || "An error occurred while processing the QR code.");
@@ -125,12 +131,12 @@ export default function Settings() {
       
       <div className="grid grid-cols-1 gap-[6vw] sm:gap-6">
         {/* Merchant Profile Card */}
-        <Card className="rounded-[4vw] sm:rounded-xl overflow-hidden border-border/40 shadow-xl bg-gradient-to-br from-card to-card/50 relative overflow-hidden group">
+        <Card className="glass-card border-primary/10 overflow-hidden relative group shadow-xl shadow-primary/5">
           <div className="absolute top-0 right-0 w-[40%] h-full bg-primary/5 skew-x-[-20deg] translate-x-[20%]" />
           <CardHeader className="p-[5vw] sm:p-6 pb-[2vw] sm:pb-4">
             <div className="flex items-center justify-between">
               <div className="space-y-[1vw] sm:space-y-1">
-                <CardTitle className="text-[5vw] sm:text-xl font-black tracking-tight flex items-center gap-[2vw] sm:gap-2 underline decoration-primary/20">
+                <CardTitle className="text-[5vw] sm:text-xl font-black tracking-tight flex items-center gap-[2vw] sm:gap-2 text-primary uppercase">
                   <Building2 className="w-[5vw] h-[5vw] max-w-[20px] max-h-[20px] text-primary" /> Merchant Profile
                 </CardTitle>
                 <CardDescription className="text-[2.5vw] sm:text-xs uppercase tracking-widest font-bold opacity-50">Business identification details.</CardDescription>
@@ -143,7 +149,7 @@ export default function Settings() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-[6vw] sm:gap-6">
                 <div className="space-y-[4vw] sm:space-y-4">
                   <div className="flex items-start gap-[3vw] sm:gap-3">
-                    <div className="p-[2vw] sm:p-2 rounded-[2vw] sm:rounded-lg bg-primary/10">
+                    <div className="p-3 rounded-xl bg-primary/10">
                       <Store className="w-[4vw] h-[4vw] max-w-[16px] max-h-[16px] text-primary" />
                     </div>
                     <div>
@@ -155,7 +161,7 @@ export default function Settings() {
 
                 <div className="space-y-[4vw] sm:space-y-4">
                   <div className="flex items-start gap-[3vw] sm:gap-3">
-                    <div className="p-[2vw] sm:p-2 rounded-[2vw] sm:rounded-lg bg-primary/10">
+                    <div className="p-3 rounded-xl bg-primary/10">
                       <MapPin className="w-[4vw] h-[4vw] max-w-[16px] max-h-[16px] text-primary" />
                     </div>
                     <div>
@@ -180,7 +186,7 @@ export default function Settings() {
         </Card>
 
         {(allMerchants.length > 0 || qrResult || qrLoading || qrError) && (
-          <Card className="border-border/40 bg-card/30 backdrop-blur-xl rounded-[6vw] sm:rounded-2xl overflow-hidden shadow-2xl shadow-primary/5">
+          <Card className="glass-card border-primary/10 overflow-hidden shadow-xl shadow-primary/5">
             <CardHeader className="p-[5vw] sm:p-6 pb-[2vw] sm:pb-4">
               <div className="flex flex-col gap-[4vw] sm:gap-4">
                 <div className="flex items-center gap-[3vw] sm:gap-4">
@@ -197,7 +203,7 @@ export default function Settings() {
                     variant="outline" 
                     size="sm" 
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full h-auto py-[3vw] sm:py-2.5 rounded-[3vw] sm:rounded-xl text-[2.8vw] sm:text-xs font-black uppercase tracking-[0.2em] border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-lg shadow-primary/5"
+                    className="w-full h-12 rounded-xl text-xs font-black uppercase tracking-[0.2em] border-2 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary transition-all duration-300"
                   >
                     <Plus className="w-[3.5vw] h-[3.5vw] mr-[2vw]" /> Link New Bank QR
                   </Button>
@@ -218,7 +224,7 @@ export default function Settings() {
                 )}
 
                 {qrResult && (
-                  <div className="bg-primary/5 rounded-[4vw] sm:rounded-xl border border-primary/20 p-[5vw] sm:p-5 space-y-[4vw] sm:space-y-4 animate-in zoom-in-95 duration-300">
+                  <div className="bg-primary/5 rounded-2xl border border-primary/20 p-6 space-y-6 animate-in zoom-in-95 duration-300 shadow-inner">
                     <div className="flex items-center justify-between">
                        <h4 className="text-[3.5vw] sm:text-sm font-black uppercase tracking-widest text-primary flex items-center gap-[2vw]">
                          <CheckCircle2 className="w-[4vw] h-[4vw]" /> New Profile Found
@@ -242,7 +248,7 @@ export default function Settings() {
                     </div>
 
                     <Button 
-                      className="w-full bg-primary text-primary-foreground font-black uppercase tracking-[0.2em] h-auto py-[4vw] sm:py-3 rounded-[3vw] sm:rounded-lg shadow-lg shadow-primary/20"
+                      className="w-full bg-primary/10 border-2 border-primary/20 text-primary hover:bg-primary/20 font-black uppercase tracking-[0.2em] h-12 rounded-xl"
                       onClick={saveMerchantData}
                     >
                       Save business profile
@@ -251,29 +257,28 @@ export default function Settings() {
                 )}
               </div>
             </CardHeader>
-            <CardContent className="p-[4vw] sm:p-6 space-y-[3vw] sm:space-y-4">
+            <CardContent className="p-[4vw] sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[3vw] sm:gap-4">
               {allMerchants.map((m) => (
                 <div 
                   key={m.id} 
-                  className={`relative p-[3vw] sm:p-4 rounded-[4vw] sm:rounded-xl border transition-all duration-300 ${
+                  className={`relative p-5 rounded-2xl border transition-all duration-300 ${
                     m.is_active 
-                      ? "bg-primary/10 border-primary/30 shadow-lg shadow-primary/5" 
-                      : "bg-muted/10 border-border/40 hover:bg-muted/20"
+                      ? "glass-card border-primary/30 border-l-[12px] border-l-primary shadow-xl shadow-primary/10 scale-[1.02]" 
+                      : "bg-primary/5 border-primary/5 hover:bg-primary/10 hover:border-primary/20"
                   }`}
                 >
                   {m.is_active && (
-                    <span className="absolute top-[2.5vw] right-[2.5vw] sm:top-3 sm:right-3 bg-primary text-primary-foreground text-[1.8vw] sm:text-[9px] font-black px-[1.5vw] py-[0.5vw] sm:px-2 sm:py-0.5 rounded-full uppercase tracking-tighter flex items-center justify-center min-w-[10vw] sm:min-w-[40px]">
-                      Active
-                    </span>
+                      <span className="absolute top-3 right-3 bg-white text-primary text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-md">
+                        Active
+                      </span>
                   )}
                   <div className="flex items-center justify-between">
                     <div className="space-y-[0.5vw]">
                       <div className="flex items-center gap-[2vw]">
-                        <span className="text-[3.2vw] sm:text-sm font-black">{m.merchant_name}</span>
+                        <span className={`text-base font-black ${m.is_active ? 'text-primary' : 'text-foreground'}`}>{m.merchant_name}</span>
                       </div>
                       <div className="flex items-center gap-[2vw] text-muted-foreground font-bold text-[2.5vw] sm:text-[10px] opacity-70">
-                        <MapPin className="w-[3vw] h-[3vw]" />
-                        <span>{BANK_NAMES[m.bank_code] || m.bank_code}, {m.merchant_city}</span>
+                        <span>{BANK_NAMES[m.bank_code] || m.bank_code} • {m.merchant_city}</span>
                       </div>
                     </div>
                     
@@ -281,7 +286,7 @@ export default function Settings() {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="h-auto py-[2vw] sm:py-2 px-[4vw] sm:px-4 rounded-full text-[2.5vw] sm:text-[10px] font-black uppercase tracking-widest border-primary/20 hover:bg-primary hover:text-primary-foreground"
+                        className="h-9 px-6 rounded-xl text-xs font-black uppercase tracking-widest border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all"
                         onClick={() => handleSetDefault(m.id)}
                         disabled={loading}
                       >
@@ -297,9 +302,9 @@ export default function Settings() {
 
         {/* Other Settings Grids */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-[4vw] sm:gap-4">
-          <Card className="rounded-[4vw] sm:rounded-xl overflow-hidden border-border/40 shadow-sm">
+          <Card className="glass-card border-primary/10 border shadow-xl shadow-primary/5 overflow-hidden">
             <CardHeader className="p-[5vw] sm:p-6 pb-[2vw] sm:pb-4">
-              <CardTitle className="text-[5vw] sm:text-lg font-black tracking-tight flex items-center gap-[2vw] sm:gap-2 underline decoration-primary/10">
+                <CardTitle className="text-lg font-black tracking-tight flex items-center gap-2 text-primary uppercase">
                 <Bell className="w-[4vw] h-[4vw] max-w-[18px] max-h-[18px] text-primary" /> Alerts
               </CardTitle>
             </CardHeader>
@@ -321,9 +326,9 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-[4vw] sm:rounded-xl overflow-hidden border-border/40 shadow-sm">
+          <Card className="glass-card border-primary/10 border shadow-xl shadow-primary/5 overflow-hidden">
             <CardHeader className="p-[5vw] sm:p-6 pb-[2vw] sm:pb-4">
-              <CardTitle className="text-[5vw] sm:text-lg font-black tracking-tight flex items-center gap-[2vw] sm:gap-2 underline decoration-rose-500/10">
+                <CardTitle className="text-lg font-black tracking-tight flex items-center gap-2 text-rose-500 uppercase">
                 <Shield className="w-[4vw] h-[4vw] max-w-[18px] max-h-[18px] text-rose-500" /> Protection
               </CardTitle>
             </CardHeader>
@@ -333,7 +338,7 @@ export default function Settings() {
                   <Label className="text-[3.5vw] sm:text-sm font-black">2FA Security</Label>
                   <div className="text-[2.5vw] sm:text-xs text-muted-foreground font-bold opacity-60">Multi-factor login.</div>
                 </div>
-                <Button variant="outline" size="sm" className="h-[8vw] sm:h-8 rounded-full text-[2.5vw] sm:text-[10px] font-black uppercase tracking-widest px-[4vw] sm:px-3">Enable</Button>
+                <Button variant="outline" size="sm" className="h-9 rounded-xl text-xs font-black uppercase tracking-widest px-4 border-rose-500/20 text-rose-500 hover:bg-rose-500/5 transition-all">Enable</Button>
               </div>
             </CardContent>
           </Card>

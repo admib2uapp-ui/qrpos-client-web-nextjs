@@ -1,6 +1,23 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { 
+  format, 
+  subDays, 
+  subWeeks, 
+  subMonths, 
+  startOfDay, 
+  endOfDay, 
+  startOfWeek, 
+  endOfWeek, 
+  startOfMonth, 
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+  eachDayOfInterval,
+  eachMonthOfInterval,
+  eachYearOfInterval
+} from 'date-fns';
 import {
   Card,
   CardContent,
@@ -22,23 +39,99 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   Bar,
-  Line,
   ResponsiveContainer,
   ComposedChart
 } from "recharts";
 import { Loader2, Building2 } from "lucide-react";
 import { useTransactions } from "../../hooks/useTransactions";
 import { BANK_NAMES } from "../../lib/constants";
-import { MOCK_BRANCHES } from "../../lib/mock-data";
 
 export default function SummaryDashboard() {
   const { transactions, merchant, loading } = useTransactions();
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [chartMode, setChartMode] = useState<"monthly" | "daily">("monthly");
+  const [startDate, setStartDate] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
+  const [endDate, setEndDate] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'));
+  const [rangePreset, setRangePreset] = useState('THIS_MONTH');
+  const [chartMode, setChartMode] = useState<"daily" | "monthly" | "yearly">("monthly");
   const [branchFilter, setBranchFilter] = useState('ALL');
+
+  const handleRangePreset = (preset: string) => {
+    setRangePreset(preset);
+    if (preset === 'ALL') {
+      setStartDate('');
+      setEndDate('');
+      return;
+    }
+
+    let start = new Date();
+    let end = new Date();
+
+    switch (preset) {
+      case 'TODAY':
+        start = startOfDay(new Date());
+        end = endOfDay(new Date());
+        setChartMode("daily");
+        break;
+      case 'YESTERDAY':
+        start = startOfDay(subDays(new Date(), 1));
+        end = endOfDay(subDays(new Date(), 1));
+        setChartMode("daily");
+        break;
+      case 'THIS_WEEK':
+        start = startOfWeek(new Date(), { weekStartsOn: 1 });
+        end = endOfWeek(new Date(), { weekStartsOn: 1 });
+        setChartMode("daily");
+        break;
+      case 'LAST_WEEK':
+        start = startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 });
+        end = endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 });
+        setChartMode("daily");
+        break;
+      case 'THIS_MONTH':
+        start = startOfMonth(new Date());
+        end = endOfMonth(new Date());
+        setChartMode("daily");
+        break;
+      case 'LAST_MONTH':
+        start = startOfMonth(subMonths(new Date(), 1));
+        end = endOfMonth(subMonths(new Date(), 1));
+        setChartMode("daily");
+        break;
+      case 'ALL':
+        setChartMode("monthly");
+        break;
+    }
+    if (preset !== 'ALL') {
+      setStartDate(format(start, 'yyyy-MM-dd'));
+      setEndDate(format(end, 'yyyy-MM-dd'));
+    }
+  };
+
+  const statusCalculations = useMemo(() => {
+    const firstTxDate = transactions.length > 0 ? new Date(transactions[transactions.length - 1].created_at) : new Date();
+    const start = startDate ? startOfDay(new Date(startDate)) : startOfDay(firstTxDate);
+    const end = endDate ? endOfDay(new Date(endDate)) : endOfDay(new Date());
+    const diffDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+
+    return {
+      diffDays,
+      isDailyDisabled: rangePreset === 'ALL' || diffDays > 31,
+      isMonthlyDisabled: diffDays <= 1 || diffDays > 366,
+      isYearlyDisabled: diffDays <= 31
+    };
+  }, [rangePreset, startDate, endDate, transactions]);
+
+  // Automated mode switching on range change - but allow manual override if not disabled
+  useEffect(() => {
+    const { diffDays } = statusCalculations;
+    if (diffDays <= 31) {
+      if (diffDays >= 1) setChartMode('daily');
+    } else if (diffDays <= 366) {
+      setChartMode('monthly');
+    } else {
+      setChartMode('yearly');
+    }
+  }, [startDate, endDate]);
 
   // Logic for manual data loading is removed as useTransactions handles it
 
@@ -59,30 +152,113 @@ export default function SummaryDashboard() {
     });
   }, [transactions, startDate, endDate, branchFilter]);
 
-  const monthMap: Record<string, { count: number; amount: number }> = {};
-  filteredTransactions.forEach((tx) => {
-    const date = new Date(tx.created_at);
-    const monthName = date.toLocaleString('default', { month: 'short' });
-    if (!monthMap[monthName]) monthMap[monthName] = { count: 0, amount: 0 };
-    monthMap[monthName].count += 1;
-    monthMap[monthName].amount += Number(tx.amount) || 0;
-  });
+  const chartData = useMemo(() => {
+    if (chartMode === 'yearly') {
+      try {
+        const firstTxDate = transactions.length > 0 ? new Date(transactions[transactions.length - 1].created_at) : new Date();
+        const start = startDate ? startOfYear(new Date(startDate)) : startOfYear(firstTxDate);
+        const end = endDate ? endOfYear(new Date(endDate)) : endOfYear(new Date());
 
-  const chartData = Object.keys(monthMap)
-    .map((name) => ({ name, ...monthMap[name] }))
-    .sort((a, b) => {
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      return months.indexOf(a.name) - months.indexOf(b.name);
-    });
+        const yearsInRange = eachYearOfInterval({ start, end });
+        const yearMap: Record<string, number> = {};
+
+        yearsInRange.forEach(y => {
+          yearMap[format(y, 'yyyy')] = 0;
+        });
+
+        filteredTransactions.forEach((tx) => {
+          const date = new Date(tx.created_at);
+          const yearKey = format(date, 'yyyy');
+          if (yearMap[yearKey] !== undefined) {
+             yearMap[yearKey] += Number(tx.amount) || 0;
+          }
+        });
+
+        return Object.entries(yearMap).map(([key, amount]) => ({
+          name: key,
+          amount: amount
+        }));
+      } catch (e) {
+        console.error("Yearly chart generation error:", e);
+        return [];
+      }
+    } else if (chartMode === 'monthly') {
+      try {
+        const firstTxDate = transactions.length > 0 ? new Date(transactions[transactions.length - 1].created_at) : new Date();
+        const start = startDate ? startOfMonth(new Date(startDate)) : startOfMonth(firstTxDate);
+        const end = endDate ? endOfMonth(new Date(endDate)) : endOfMonth(new Date());
+
+        const monthsInRange = eachMonthOfInterval({ start, end });
+        const monthMap: Record<string, number> = {};
+
+        monthsInRange.forEach(m => {
+          monthMap[format(m, 'MMM yyyy')] = 0;
+        });
+
+        filteredTransactions.forEach((tx) => {
+          const date = new Date(tx.created_at);
+          const monthKey = format(date, 'MMM yyyy');
+          if (monthMap[monthKey] !== undefined) {
+             monthMap[monthKey] += Number(tx.amount) || 0;
+          }
+        });
+
+        return Object.entries(monthMap).map(([key, amount]) => ({
+          name: key.split(' ')[0], // Keep just "Oct" for the label
+          amount: amount
+        }));
+      } catch (e) {
+        console.error("Monthly chart generation error:", e);
+        return [];
+      }
+    } else {
+      // Daily mode: Based on the selected range (e.g. Last Month, This Month, etc.)
+      try {
+        const start = startOfDay(new Date(startDate));
+        const end = endOfDay(new Date(endDate));
+        
+        // Logic check to prevent excessive calculations
+        const diffDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays > 45) {
+          // If the range is too long (e.g. 2 months), fallback to monthly OR just show a limited range
+          // But user wants "columns for each day", so we keep it but warn if it was too large.
+          // For now, let's just use the selected range.
+        }
+
+        const daysInRange = eachDayOfInterval({ start, end });
+        const dayMap: Record<string, number> = {};
+        
+        daysInRange.forEach(day => {
+          dayMap[format(day, 'yyyy-MM-dd')] = 0;
+        });
+
+        filteredTransactions.forEach((tx) => {
+          const date = new Date(tx.created_at);
+          const dayKey = format(date, 'yyyy-MM-dd');
+          if (dayMap[dayKey] !== undefined) {
+            dayMap[dayKey] += Number(tx.amount) || 0;
+          }
+        });
+
+        return Object.entries(dayMap).map(([dayKey, amount]) => ({
+          name: format(new Date(dayKey), 'd'), // Show day of the month as requested
+          amount: amount
+        }));
+      } catch (e) {
+        console.error("Chart generation error:", e);
+        return [];
+      }
+    }
+  }, [filteredTransactions, chartMode]);
 
   const totalCount = filteredTransactions.length;
   const totalAmount = filteredTransactions.reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0);
 
   return (
     <div className="space-y-[4vw] sm:space-y-8 animate-in fade-in duration-500 pb-[10vw] sm:pb-0">
-      <Card className="rounded-[4vw] sm:rounded-xl overflow-hidden border-border/40 shadow-sm">
+      <Card className="glass-card border-primary/10 overflow-hidden shadow-xl shadow-primary/5">
         <CardHeader className="p-[5vw] sm:p-6">
-          <CardTitle className="text-[5vw] sm:text-xl font-black tracking-tight underline decoration-primary/20">Dashboard Filters</CardTitle>
+          <CardTitle className="text-[5vw] sm:text-xl font-black tracking-tight text-primary uppercase">Dashboard Filters</CardTitle>
           <CardDescription className="text-[3vw] sm:text-sm uppercase tracking-widest font-bold opacity-50">Refine your transaction analytics.</CardDescription>
         </CardHeader>
         <CardContent className="px-[4vw] py-[3vw] sm:p-6 space-y-[4vw] sm:space-y-6 relative">
@@ -94,18 +270,38 @@ export default function SummaryDashboard() {
           <div className="flex flex-wrap items-center gap-[3vw] sm:gap-4">
             <Input
               type="date"
-              className="w-full sm:w-[200px] h-[12vw] sm:h-10 rounded-[2.5vw] sm:rounded-md text-[3.5vw] sm:text-sm font-bold bg-secondary/30"
+              className="w-full sm:w-[200px] h-[12vw] sm:h-12 rounded-[2.5vw] sm:rounded-xl text-[3.5vw] sm:text-sm font-bold bg-primary/5 border-primary/10 transition-all focus:ring-primary/20"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
             <span className="hidden sm:inline text-muted-foreground">-</span>
             <Input
               type="date"
-              className="w-full sm:w-[200px] h-[12vw] sm:h-10 rounded-[2.5vw] sm:rounded-md text-[3.5vw] sm:text-sm font-bold bg-secondary/30"
+              className="w-full sm:w-[200px] h-[12vw] sm:h-12 rounded-[2.5vw] sm:rounded-xl text-[3.5vw] sm:text-sm font-bold bg-primary/5 border-primary/10 transition-all focus:ring-primary/20"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setRangePreset('CUSTOM');
+              }}
             />
-            <div className="flex-1 min-w-[200px] h-[12vw] sm:h-10 rounded-[2.5vw] sm:rounded-md bg-secondary/10 border border-border/20 px-4 flex items-center gap-3">
+
+            <Select value={rangePreset} onValueChange={handleRangePreset}>
+              <SelectTrigger className="w-full sm:w-[160px] h-12 border-primary/10 bg-primary/5 focus-visible:ring-primary/20 transition-all font-black text-[10px] uppercase tracking-widest rounded-xl">
+                <SelectValue placeholder="Range" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Time</SelectItem>
+                <SelectItem value="TODAY">Today</SelectItem>
+                <SelectItem value="YESTERDAY">Yesterday</SelectItem>
+                <SelectItem value="THIS_WEEK">This Week</SelectItem>
+                <SelectItem value="LAST_WEEK">Last Week</SelectItem>
+                <SelectItem value="THIS_MONTH">This Month</SelectItem>
+                <SelectItem value="LAST_MONTH">Last Month</SelectItem>
+                <SelectItem value="CUSTOM">Custom Range</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <div className="flex-1 min-w-[200px] h-[12vw] sm:h-12 rounded-[2.5vw] sm:rounded-xl bg-secondary/10 border border-border/20 px-4 flex items-center gap-3">
               <Building2 className="w-4 h-4 text-primary" />
               <div className="flex flex-col">
                 <span className="text-[3vw] sm:text-sm font-black text-foreground truncate">
@@ -118,46 +314,58 @@ export default function SummaryDashboard() {
             </div>
             <Button 
                 variant="outline" 
-                onClick={() => { setStartDate(""); setEndDate(""); setBranchFilter("ALL"); }}
-                className="w-full sm:w-auto h-[10vw] sm:h-9 text-[3vw] sm:text-xs font-black uppercase tracking-widest rounded-full"
+                onClick={() => { 
+                  setStartDate(""); 
+                  setEndDate(""); 
+                  setBranchFilter("ALL"); 
+                  setRangePreset("ALL");
+                }}
+                className="w-full sm:w-auto h-[10vw] sm:h-12 text-[3vw] sm:text-xs font-black uppercase tracking-widest rounded-xl border-primary/10 hover:bg-primary/5 transition-all text-muted-foreground"
             >
-              Reset Filters
+              Reset
             </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-[2vw] sm:gap-4">
-            <div className="bg-[#34b4ea] dark:bg-primary rounded-[4vw] sm:rounded-xl px-[4vw] py-[3vw] sm:p-6 shadow-xl shadow-primary/10 relative overflow-hidden group">
-               <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-               <p className="text-[2.8vw] sm:text-xs font-bold text-white/70 uppercase tracking-[0.2em] mb-[0.5vw]">Volume</p>
-               <p className="text-[8vw] sm:text-3xl font-black text-white tracking-tighter tabular-nums leading-none">
+            <div className="glass-card border-l-4 border-primary rounded-[4vw] sm:rounded-2xl px-[4vw] py-[3vw] sm:p-8 shadow-xl shadow-primary/5 relative overflow-hidden group">
+               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-50" />
+               <p className="text-[2.8vw] sm:text-xs font-bold text-primary/60 uppercase tracking-[0.2em] mb-[0.5vw] relative z-10">Settlement Value</p>
+               <div className="relative z-10">
+                 <p className="text-[10vw] sm:text-4xl font-black text-foreground tracking-tighter tabular-nums leading-none">
+                   LKR {totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                 </p>
+                 <p className="text-[2.2vw] sm:text-[10px] font-black text-muted-foreground/30 uppercase tracking-widest mt-[0.5vw]">Total Amount</p>
+               </div>
+            </div>
+            <div className="bg-primary/5 border-2 border-primary/10 rounded-[4vw] sm:rounded-2xl px-[4vw] py-[3vw] sm:p-8 shadow-inner shadow-primary/5">
+               <p className="text-[2.8vw] sm:text-xs font-bold text-primary/60 uppercase tracking-[0.2em] mb-[0.5vw]">Transaction Volume</p>
+               <p className="text-[10vw] sm:text-4xl font-black text-foreground tracking-tighter tabular-nums leading-none">
                  {totalCount.toLocaleString()}
                </p>
-               <p className="text-[2.2vw] sm:text-[10px] font-black text-white/40 uppercase tracking-widest mt-[0.5vw]">Verified Transactions</p>
-            </div>
-            <div className="bg-secondary/30 dark:bg-card border border-border/40 rounded-[4vw] sm:rounded-xl px-[4vw] py-[3vw] sm:p-6 shadow-sm">
-               <p className="text-[2.8vw] sm:text-xs font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mb-[0.5vw]">Value</p>
-               <p className="text-[8vw] sm:text-3xl font-black text-primary tracking-tighter tabular-nums leading-none">
-                 LKR {totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-               </p>
-               <p className="text-[2.2vw] sm:text-[10px] font-black text-muted-foreground/30 uppercase tracking-widest mt-[0.5vw]">Total Settlement</p>
+               <p className="text-[2.2vw] sm:text-[10px] font-black text-muted-foreground/30 uppercase tracking-widest mt-[0.5vw]">Verified History</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border-none shadow-none bg-transparent">
-        <CardHeader className="px-[4vw] py-[3vw] sm:p-6 pb-0 sm:pb-4 border-b border-sidebar-border/20">
+      <Card className="glass-card border-primary/10 overflow-hidden shadow-xl shadow-primary/5">
+        <CardHeader className="px-[4vw] py-[3vw] sm:p-6 pb-0 sm:pb-4 border-b border-sidebar-border/20 flex flex-row justify-between">
           <div className="space-y-[1vw] sm:space-y-1">
-            <CardTitle className="text-[5vw] sm:text-xl font-black tracking-tight underline decoration-emerald-500/20">Performance Chart</CardTitle>
-            <CardDescription className="text-[2.5vw] sm:text-xs uppercase tracking-widest font-bold opacity-40">Monthly Volume Analytics</CardDescription>
+            <CardTitle className="text-[5vw] sm:text-xl font-black tracking-tight text-primary uppercase">Performance Chart</CardTitle>
+            <CardDescription className="text-[2.5vw] sm:text-xs uppercase tracking-widest font-bold opacity-40">
+              {chartMode === 'monthly' ? 'Monthly Volume Analytics' : 
+               chartMode === 'yearly' ? 'Annual Strategic Performance' :
+               'Daily Revenue Trends'}
+            </CardDescription>
           </div>
           <Select value={chartMode} onValueChange={(v) => setChartMode(v as any)}>
             <SelectTrigger className="w-[30vw] sm:w-[120px] h-[8vw] sm:h-9 rounded-[2vw] sm:rounded-md text-[2.5vw] sm:text-xs font-bold bg-secondary/30">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="monthly">Monthly</SelectItem>
-              <SelectItem value="daily">Daily</SelectItem>
+              <SelectItem value="daily" disabled={statusCalculations.isDailyDisabled}>Daily</SelectItem>
+              <SelectItem value="monthly" disabled={statusCalculations.isMonthlyDisabled}>Monthly</SelectItem>
+              <SelectItem value="yearly" disabled={statusCalculations.isYearlyDisabled}>Yearly</SelectItem>
             </SelectContent>
           </Select>
         </CardHeader>
@@ -166,15 +374,13 @@ export default function SummaryDashboard() {
             <ResponsiveContainer width="100%" height="100%" minHeight={200} debounce={50}>
               <ComposedChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: '2.5vw' }} />
-                <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: '2.5vw' }} />
-                <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: '2.5vw' }} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.95)', border: 'none', borderRadius: '12px', padding: '12px' }}
-                  itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 'bold' }}
+                   contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.95)', border: 'none', borderRadius: '12px', padding: '12px' }}
+                   itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 'bold' }}
                 />
-                <Bar yAxisId="left" dataKey="count" fill="#34b4ea" radius={[6, 6, 0, 0]} name="Count" />
-                <Line yAxisId="right" type="monotone" dataKey="amount" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981' }} name="Value" />
+                <Bar dataKey="amount" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} name="Value" />
               </ComposedChart>
             </ResponsiveContainer>
           </div>

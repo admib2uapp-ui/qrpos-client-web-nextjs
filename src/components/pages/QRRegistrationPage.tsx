@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TransactionForm, TransactionStatus } from "@/components/qr/QRRegistration";
 import { generateQRData, initiateTransaction } from "@/lib/qrService";
 import { DbTransaction } from "@/lib/supabase";
@@ -14,9 +14,17 @@ export default function QRRegistrationPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [resetKey, setResetKey] = useState(0);
+  
   const { isSuccess } = useTransactionStatus(
     currentTx?.ref || null, 
-    currentTx?.amount || "0"
+    currentTx?.amount || "0",
+    () => {
+      // Dynamic Reset: Triggered when speech finishes
+      setCurrentTx(null);
+      setQrBase64(null);
+      setResetKey(prev => prev + 1);
+    }
   );
 
   const handleGenerate = async (amount: string, ref: string) => {
@@ -51,10 +59,10 @@ export default function QRRegistrationPage() {
   return (
     <main className="p-4 sm:p-6 lg:p-8 space-y-8 animate-in fade-in duration-700">
       <div className="flex flex-col items-start gap-8 lg:flex-row">
-        <div className="w-full lg:w-1/2">
-          <TransactionForm onGenerate={handleGenerate} isLoading={isLoading} />
+        <div className="w-full lg:w-[45%]">
+          <TransactionForm key={resetKey} onGenerate={handleGenerate} isLoading={isLoading} />
         </div>
-        <div className="w-full lg:w-1/2 lg:sticky lg:top-8">
+        <div className="w-full lg:w-[50%] lg:sticky lg:top-8">
             {currentTx ? (
               <TransactionStatus 
                 amount={currentTx.amount} 

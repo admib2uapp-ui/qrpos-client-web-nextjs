@@ -23,19 +23,20 @@ import { useAuth } from "@/hooks/useAuth"
 
 function SidebarBrand({ title }: { title: string }) {
   return (
-    <div className="flex items-center justify-between px-3 group-data-[collapsible=icon]:px-0">
-      <div className="group/logo relative flex flex-1 items-center justify-center gap-2 transition-all duration-200 cursor-pointer group-data-[collapsible=icon]:cursor-default">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-opacity duration-150 group-data-[collapsible=icon]:group-hover/logo:opacity-0">
-           <QrCode className="h-5 w-5" />
+    <div className="flex items-center justify-between px-4 group-data-[collapsible=icon]:px-0">
+      <div className="group/logo relative flex flex-1 items-center gap-3 transition-all duration-300 cursor-pointer group-data-[collapsible=icon]:justify-center">
+        <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-transform duration-300 group-hover/logo:scale-110">
+           <QrCode className="h-6 w-6" />
+           <div className="absolute inset-0 bg-white/20 rounded-xl blur-[8px] opacity-0 group-hover/logo:opacity-100 transition-opacity" />
         </div>
         <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-          <span className="text-sm font-bold text-sidebar-foreground">{title}</span>
-          <span className="text-xs text-sidebar-foreground/60">Next.js Portal</span>
+          <span className="text-sm font-black text-foreground tracking-tight">{title}</span>
+          <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] opacity-80">POS Terminal</span>
         </div>
         <SidebarTrigger className="absolute inset-0 hidden items-center justify-center rounded-md opacity-0 pointer-events-none transition-opacity duration-150 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:group-hover/logo:opacity-100 group-data-[collapsible=icon]:group-hover/logo:pointer-events-auto" />
       </div>
       <div className="shrink-0 group-data-[collapsible=icon]:hidden">
-        <SidebarTrigger />
+        <SidebarTrigger className="hover:bg-primary/10 hover:text-primary transition-colors" />
       </div>
     </div>
   );
@@ -53,7 +54,7 @@ export function AppSidebar({ theme, toggleTheme }: { theme: "light" | "dark"; to
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/70">Main Menu</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.2em] mb-2 px-4">Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -84,10 +85,10 @@ export function AppSidebar({ theme, toggleTheme }: { theme: "light" | "dark"; to
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <Separator className="mx-4 my-2 opacity-50 bg-sidebar-border font-bold h-[2px]" />
+        <Separator className="mx-4 my-4 opacity-20 bg-primary/20" />
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/70">Account</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.2em] mb-2 px-4">Account</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>

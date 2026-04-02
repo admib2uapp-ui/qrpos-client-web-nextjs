@@ -17,7 +17,7 @@ export function TransactionForm({ onGenerate, isLoading }: { onGenerate: (amount
   };
 
   return (
-    <Card>
+    <Card className="glass-card overflow-hidden">
       <CardHeader>
         <CardTitle>Generate QR</CardTitle>
         <CardDescription>Enter amount to generate a static or dynamic QR code.</CardDescription>
@@ -33,7 +33,7 @@ export function TransactionForm({ onGenerate, isLoading }: { onGenerate: (amount
               step="0.01" 
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="text-xl font-bold h-12 border-sidebar-border/50 bg-sidebar/10" 
+              className="text-2xl font-black h-16 border-primary/20 bg-primary/5 focus-visible:ring-primary/30 transition-all text-primary" 
             />
           </div>
           <div className="space-y-2">
@@ -43,13 +43,13 @@ export function TransactionForm({ onGenerate, isLoading }: { onGenerate: (amount
               placeholder="e.g. INV-100" 
               value={ref}
               onChange={(e) => setRef(e.target.value)}
-              className="h-12 border-sidebar-border/50 bg-sidebar/10"
+              className="h-14 border-primary/10 bg-primary/5 focus-visible:ring-primary/20 transition-all"
             />
           </div>
           <Button 
             type="submit" 
             disabled={isLoading}
-            className="w-full h-12 text-lg font-semibold gap-2 shadow-lg hover:shadow-primary/20 transition-all"
+            className="w-full h-14 text-lg font-black gap-3 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] transition-all bg-primary hover:bg-primary/90 text-primary-foreground uppercase tracking-widest"
           >
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <QrCode className="w-5 h-5" />}
             Generate LankaQR
@@ -82,17 +82,22 @@ export function TransactionStatus({
 
   if (isSuccess) {
     return (
-      <Card className="p-8 flex flex-col items-center justify-center space-y-6 animate-in zoom-in duration-500 bg-green-50/30 border-green-100">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-          <CheckCircle2 className="w-12 h-12 text-green-600 animate-bounce" />
+      <Card className="glass-card p-10 flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-700 bg-emerald-500/5 border-emerald-500/20 shadow-[0_0_50px_rgba(16,185,129,0.1)]">
+        <div className="relative">
+          <div className="absolute inset-0 bg-emerald-500 blur-[30px] opacity-20 animate-pulse" />
+          <div className="relative w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center shadow-xl shadow-emerald-500/30">
+            <CheckCircle2 className="w-14 h-14 text-white animate-in zoom-in spin-in-90 duration-500" />
+          </div>
         </div>
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold text-green-700">Payment Received</h2>
-          <p className="text-muted-foreground text-lg">LKR {parseFloat(amount).toFixed(2)}</p>
-          <p className="text-xs font-mono text-muted-foreground/60">{ref}</p>
+        <div className="text-center space-y-3">
+          <h2 className="text-3xl font-black text-foreground tracking-tight">Payment Received</h2>
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-600 font-black text-xl">
+            LKR {parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+          </div>
+          <p className="text-sm font-bold text-muted-foreground/60 tracking-wider uppercase">{ref}</p>
         </div>
         <Button 
-          className="w-full bg-green-600 hover:bg-green-700"
+          className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all"
           onClick={() => window.location.reload()}
         >
           New Transaction
@@ -102,58 +107,38 @@ export function TransactionStatus({
   }
 
   return (
-    <Card className="animate-in zoom-in-95 duration-500">
-      <CardContent className="pt-6 flex flex-col items-center text-center space-y-6">
-        <div className="relative p-6 bg-white rounded-2xl shadow-inner border border-sidebar-border/10 min-h-[220px] flex items-center justify-center">
+    <Card className="glass-card animate-in slide-in-from-right-8 duration-700 overflow-hidden relative border-primary/10">
+      <CardContent className="p-2 flex flex-col items-center text-center">
+        <div className="relative overflow-hidden rounded-[2rem] flex items-center justify-center min-h-[600px] py-4 w-full bg-slate-950/5 dark:bg-slate-950/40 border border-primary/5 p-0">
           {loading ? (
-            <div className="flex flex-col items-center gap-2">
-              <Loader2 className="w-12 h-12 text-primary animate-spin" />
-              <p className="text-xs text-muted-foreground">Generating QR...</p>
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="w-16 h-16 text-primary animate-spin" />
+              <p className="text-sm font-bold text-muted-foreground animate-pulse">Generating Secure QR...</p>
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center gap-2 text-destructive">
-              <AlertCircle className="w-12 h-12" />
-              <p className="text-xs">{error}</p>
+            <div className="flex flex-col items-center gap-4 text-destructive p-8">
+              <AlertCircle className="w-16 h-16" />
+              <p className="text-sm font-bold text-center">{error}</p>
             </div>
           ) : qrBase64 ? (
-            <>
+            <div className="relative w-fit mx-auto flex flex-col items-center gap-6">
               <img 
-                src={getQrSrc(qrBase64)} 
+                src={getQrSrc(qrBase64!)} 
                 alt="LankaQR" 
-                className="w-[180px] h-[180px] animate-in fade-in duration-500"
+                className="w-full h-auto aspect-square object-contain rounded-[2rem] shadow-2xl transition-transform hover:scale-[1.02]"
               />
-              <div className="absolute -top-3 -right-3 bg-primary text-primary-foreground rounded-full p-2 shadow-lg">
-                <CheckCircle2 className="w-5 h-5" />
-              </div>
-            </>
+
+            </div>
+            
           ) : (
-             <div className="w-[180px] h-[180px] bg-slate-100 dark:bg-slate-200 flex items-center justify-center rounded-lg border-2 border-dashed border-slate-300">
-                <QrCode className="w-24 h-24 text-slate-400" />
+             <div className="w-full aspect-square flex flex-col items-center justify-center rounded-[2.5rem] border-4 border-dashed border-primary/10 bg-primary/5">
+                <QrCode className="w-32 h-32 text-primary/20" />
+                <p className="mt-4 text-sm font-bold text-primary/30 uppercase tracking-widest">QR Display Area</p>
              </div>
           )}
         </div>
 
-        <div className="space-y-1">
-          <p className="text-3xl font-bold text-primary">LKR {parseFloat(amount).toFixed(2)}</p>
-          <p className="text-sm text-muted-foreground font-mono">{ref || "No Reference"}</p>
-          {qrBase64 && (
-            <p className="text-[10px] text-muted-foreground/50 font-mono truncate max-w-[200px]">
-              Debug: {qrBase64.substring(0, 100)}...
-            </p>
-          )}
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 w-full">
-          <Button variant="outline" disabled={!qrBase64} className="gap-2 h-11 border-sidebar-border/50 bg-sidebar/10">
-            <Download className="w-4 h-4" /> Download
-          </Button>
-          <Button variant="outline" disabled={!qrBase64} className="gap-2 h-11 border-sidebar-border/50 bg-sidebar/10">
-            <Share2 className="w-4 h-4" /> Share
-          </Button>
-          <Button variant="outline" disabled={!qrBase64} className="gap-2 h-11 col-span-2 border-sidebar-border/50 bg-sidebar/10">
-            <Clipboard className="w-4 h-4" /> Copy Link
-          </Button>
-        </div>
+        
       </CardContent>
     </Card>
   );

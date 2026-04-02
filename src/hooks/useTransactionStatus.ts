@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 
-export function useTransactionStatus(referenceNo: string | null, amount: string) {
+export function useTransactionStatus(referenceNo: string | null, amount: string, onDoneSpeaking?: () => void) {
   const [isSuccess, setIsSuccess] = useState(false);
   const [isInitialCheckDone, setIsInitialCheckDone] = useState(false);
 
@@ -43,9 +43,16 @@ export function useTransactionStatus(referenceNo: string | null, amount: string)
           // Trigger voice notification
           try {
             const speech = new SpeechSynthesisUtterance(`${amount} rupees received`);
+            if (onDoneSpeaking) {
+              speech.onend = () => {
+                // Adding a small 1s delay for better UX after speech finishes
+                setTimeout(onDoneSpeaking, 1000);
+              };
+            }
             window.speechSynthesis.speak(speech);
           } catch (e) {
             console.error("Speech error:", e);
+            if (onDoneSpeaking) onDoneSpeaking();
           }
         }
       )
@@ -54,7 +61,7 @@ export function useTransactionStatus(referenceNo: string | null, amount: string)
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [referenceNo, amount]);
+  }, [referenceNo, amount, onDoneSpeaking]);
 
   return { isSuccess, isInitialCheckDone };
 }
