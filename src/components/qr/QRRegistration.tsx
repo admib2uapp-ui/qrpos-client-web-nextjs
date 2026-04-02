@@ -33,11 +33,11 @@ export function TransactionForm({ onGenerate, isLoading }: { onGenerate: (amount
               step="0.01" 
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="text-2xl font-black h-16 border-primary/20 bg-primary/5 focus-visible:ring-primary/30 transition-all text-primary" 
+              className="text-2xl font-black h-14 border-primary/20 bg-primary/5 focus-visible:ring-primary/30 transition-all text-primary no-spinner" 
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="ref">Reference Number (Optional)</Label>
+            <Label htmlFor="ref">Invoice Number (Optional)</Label>
             <Input 
               id="ref" 
               placeholder="e.g. INV-100" 
@@ -49,7 +49,7 @@ export function TransactionForm({ onGenerate, isLoading }: { onGenerate: (amount
           <Button 
             type="submit" 
             disabled={isLoading}
-            className="w-full h-14 text-lg font-black gap-3 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] transition-all bg-primary hover:bg-primary/90 text-primary-foreground uppercase tracking-widest"
+            className="w-full h-10 text-lg font-black gap-3 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] transition-all bg-primary hover:bg-primary/90 text-primary-foreground uppercase tracking-widest"
           >
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <QrCode className="w-5 h-5" />}
             Generate LankaQR

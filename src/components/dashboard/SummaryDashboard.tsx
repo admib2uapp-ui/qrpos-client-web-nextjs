@@ -136,13 +136,15 @@ export default function SummaryDashboard() {
   // Logic for manual data loading is removed as useTransactions handles it
 
   const filteredTransactions = useMemo(() => {
-    return transactions.filter((tx) => {
+    return transactions.filter(tx => {
       const created = new Date(tx.created_at);
-      if (startDate && created < new Date(startDate)) return false;
+      if (startDate) {
+        const s = startOfDay(new Date(startDate + 'T00:00:00'));
+        if (created < s) return false;
+      }
       if (endDate) {
-        const e = new Date(endDate);
-        e.setDate(e.getDate() + 1);
-        if (created >= e) return false;
+        const e = endOfDay(new Date(endDate + 'T23:59:59'));
+        if (created > e) return false;
       }
       if (tx.status !== 'SUCCESS') return false;
       // Since we don't have real branch data in transactions yet, 

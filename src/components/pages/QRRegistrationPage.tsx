@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { TransactionForm, TransactionStatus } from "@/components/qr/QRRegistration";
+import { MerchantPulseCard, LiveActivityFeed, MerchantMomentumCard } from "@/components/qr/QRRegistrationComponents";
 import { generateQRData, initiateTransaction } from "@/lib/qrService";
-import { DbTransaction } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
 import { useTransactionStatus } from "@/hooks/useTransactionStatus";
+import { useTransactions } from "@/hooks/useTransactions";
 
 export default function QRRegistrationPage() {
   const { user } = useAuth();
+  const { transactions, merchant, refresh } = useTransactions();
   const [currentTx, setCurrentTx] = useState<{ amount: string; ref: string } | null>(null);
   const [qrBase64, setQrBase64] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,6 +41,9 @@ export default function QRRegistrationPage() {
       const amountNum = parseFloat(amount);
       const transaction = await initiateTransaction(amountNum, ref || null, user.id);
       
+      // Update the local transactions list immediately to show the "Pending" status
+      refresh();
+
       // Update UI with the final reference
       setCurrentTx({ amount, ref: transaction.reference_no });
 
@@ -57,12 +62,15 @@ export default function QRRegistrationPage() {
   };
 
   return (
-    <main className="p-4 sm:p-6 lg:p-8 space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-col items-start gap-8 lg:flex-row">
-        <div className="w-full lg:w-[45%]">
+    <main className="p-4 sm:p-6 lg:p-8 space-y-6 animate-in fade-in duration-700">
+      
+      <div className="flex flex-col lg:flex-row items-start gap-6">
+        <div className="w-full lg:w-[40%] flex flex-col gap-6">
           <TransactionForm key={resetKey} onGenerate={handleGenerate} isLoading={isLoading} />
+          <LiveActivityFeed transactions={transactions} />
         </div>
-        <div className="w-full lg:w-[50%] lg:sticky lg:top-8">
+        
+        <div className="w-full lg:w-[60%] lg:sticky lg:top-6">
             {currentTx ? (
               <TransactionStatus 
                 amount={currentTx.amount} 
@@ -73,8 +81,9 @@ export default function QRRegistrationPage() {
                 isSuccess={isSuccess}
               />
             ) : (
-              <div className="border border-dashed border-sidebar-border/50 rounded-xl h-[400px] flex items-center justify-center text-muted-foreground bg-sidebar/5">
-                Generate a QR to see details here
+              <div className="flex flex-col gap-6">
+                <MerchantPulseCard transactions={transactions} />
+                <MerchantMomentumCard transactions={transactions} />
               </div>
             )}
         </div>
