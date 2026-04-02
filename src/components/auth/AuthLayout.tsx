@@ -36,7 +36,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
           {/* Logo Section */}
           <div className="mb-12 flex items-center gap-4 group">
             <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-2xl flex-shrink-0 group-hover:scale-110 transition-transform duration-500 overflow-hidden border border-white/5 p-1">
-              <img src="/logo.jpeg" alt="LankaQR POS" className="w-full h-full object-contain" />
+              <img src="/logo.png" alt="QR POS" className="w-full h-full object-contain" />
             </div>
             <div className="text-left">
               <h1 className="text-4xl font-black tracking-tighter text-white leading-none">
