@@ -284,7 +284,7 @@ export const fetchAllTransactions = async (merchantId?: string) => {
     const mapPending = (t: DbTransaction, idx: number) => ({
       transaction_uuid: `pending-${t.id}-${idx}`,
       transaction_id: t.local_id || t.id.slice(0, 8),
-      invoice_number: t.invoice_no || t.reference_no,
+      invoice_number: t.invoice_no || "-",
       amount: t.amount.toString(),
       currency: 'LKR',
       status: t.status === 'pending' ? 'PENDING' : t.status === 'completed' ? 'SUCCESS' : 'FAILED',
@@ -294,7 +294,7 @@ export const fetchAllTransactions = async (merchantId?: string) => {
     const mapCompleted = (t: CompletedTransaction, idx: number) => ({
       transaction_uuid: `completed-${t.id}-${idx}`,
       transaction_id: t.local_id || t.id.slice(0, 8),
-      invoice_number: t.invoice_no || t.reference_no,
+      invoice_number: t.invoice_no || "-",
       amount: t.amount.toString(),
       currency: 'LKR',
       status: 'SUCCESS' as const,
@@ -304,7 +304,7 @@ export const fetchAllTransactions = async (merchantId?: string) => {
     const mapCancelled = (t: CancelledTransaction, idx: number) => ({
       transaction_uuid: `cancelled-${t.id}-${idx}`,
       transaction_id: t.local_id || t.id.slice(0, 8),
-      invoice_number: t.invoice_no || t.reference_no,
+      invoice_number: t.invoice_no || "-",
       amount: t.amount.toString(),
       currency: 'LKR',
       status: 'FAILED' as const,
