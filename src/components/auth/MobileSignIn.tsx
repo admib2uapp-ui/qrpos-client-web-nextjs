@@ -122,7 +122,7 @@ export function MobileSignIn() {
               {isLoading ? (
                 <Loader2 className="w-[6vw] h-[6vw] animate-spin" />
               ) : (
-                "Authenticate"
+                "Login to QR POS"
               )}
             </Button>
           </form>

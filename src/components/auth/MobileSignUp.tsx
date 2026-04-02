@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "../../lib/utils";
 
+type Step = "form" | "verify" | "success";
+
 export function MobileSignUp() {
   const router = useRouter();
   const [fullName, setFullName] = useState("");
@@ -16,11 +18,12 @@ export function MobileSignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [step, setStep] = useState<Step>("form");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +60,7 @@ export function MobileSignUp() {
       });
 
       if (error) throw error;
-      setSuccess(true);
+      setStep("verify");
     } catch (err: any) {
       setError(err.message || "Sign up failed");
     } finally {
@@ -65,7 +68,27 @@ export function MobileSignUp() {
     }
   };
 
-  if (success) {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: "signup"
+      });
+      if (error) throw error;
+      setStep("success");
+    } catch (err: any) {
+      setError(err.message || "Invalid or expired code");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (step === "success") {
     return (
       <div className="flex flex-col h-screen bg-background items-center justify-center px-[10vw]">
         <div className="bg-card/50 backdrop-blur-xl rounded-[6vw] p-[10vw] border border-border/40 shadow-2xl text-center space-y-[6vw]">
@@ -73,14 +96,14 @@ export function MobileSignUp() {
             <CheckCircle2 className="w-[10vw] h-[10vw] text-emerald-500" />
           </div>
           <div>
-            <h1 className="text-[6vw] font-black tracking-tight underline decoration-emerald-500/20 underline-offset-4">Success!</h1>
-            <p className="text-[3vw] font-bold text-muted-foreground/60 uppercase tracking-widest mt-[2vw]">Verify your email to activate terminal.</p>
+            <h1 className="text-[6vw] font-black tracking-tight underline decoration-emerald-500/20 underline-offset-4 uppercase">Success!</h1>
+            <p className="text-[3vw] font-bold text-muted-foreground/60 uppercase tracking-widest mt-[2vw]">Your merchant terminal is now active.</p>
           </div>
           <Button
-            onClick={() => router.push("/mobile/signin")}
+            onClick={() => router.push("/mobile/calculator")}
             className="w-full h-[12vw] rounded-full bg-primary font-black uppercase tracking-widest shadow-lg shadow-primary/20"
           >
-            Go to Login
+            Launch Command Center
           </Button>
         </div>
       </div>
@@ -89,12 +112,12 @@ export function MobileSignUp() {
 
   return (
     <div className="flex flex-col min-h-[100svh] h-[100svh] bg-background transition-colors duration-300 overflow-y-auto pb-[5vh]">
-      {/* Brand Section - Dynamically scaling based on viewport height */}
+      {/* Brand Section */}
       <div className="flex flex-col items-center justify-center pt-[3vh] pb-[2vh] px-[10vw] flex-shrink-0">
         <div className="w-[10vh] h-[10vh] max-w-[80px] max-h-[80px] rounded-2xl bg-white flex items-center justify-center shadow-2xl border border-white/5 p-1 mb-[2vh]">
           <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
         </div>
-        <h1 className="text-[4vh] max-text-3xl font-black text-foreground tracking-tighter tabular-nums leading-none">QR <span className="text-primary tracking-normal">POS</span></h1>
+        <h1 className="text-[4vh] max-text-3xl font-black text-foreground tracking-tighter tabular-nums leading-none uppercase">QR <span className="text-primary tracking-normal">POS</span></h1>
         <p className="text-[1.5vh] max-text-sm font-black text-muted-foreground/40 uppercase tracking-[0.4em] mt-[1vh]">Setup Merchant Node</p>
       </div>
 
@@ -104,120 +127,162 @@ export function MobileSignUp() {
           <div className="absolute top-0 right-0 w-[50%] h-[2vw] bg-primary/20 blur-xl" />
           
           <div className="mb-[6vw]">
-            <h2 className="text-[6vw] sm:text-xl font-black text-foreground tracking-tight underline decoration-primary/20 underline-offset-4">Create Account</h2>
-            <p className="text-[3vw] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-widest mt-[1vw]">Initialize your terminal access</p>
+            <h2 className="text-[6vw] sm:text-xl font-black text-foreground tracking-tight underline decoration-primary/20 underline-offset-4 uppercase">
+              {step === "form" ? "Create Account" : "Verify Identity"}
+            </h2>
+            <p className="text-[3vw] sm:text-xs font-bold text-muted-foreground/50 uppercase tracking-widest mt-[1vw]">
+              {step === "form" ? "Initialize your terminal access" : `We've sent a code to ${email}`}
+            </p>
           </div>
 
           {error && (
-            <div className="bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[2.8vw] sm:text-xs font-bold p-[3vw] rounded-[2vw] mb-[6vw]">
+            <div className="bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[2.8vw] sm:text-xs font-bold p-[3vw] rounded-[2vw] mb-[6vw] animate-in fade-in zoom-in-95 uppercase tracking-widest">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSignUp} className="space-y-[3vw]">
-            <div className="space-y-[1.5vw]">
-              <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Full Name</label>
-              <Input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="John Doe"
-                className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
-                required
-              />
-            </div>
-
-            <div className="space-y-[1.5vw]">
-              <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Company Name</label>
-              <Input
-                type="text"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                placeholder="Lanka Solutions PBC"
-                className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
-                required
-              />
-            </div>
-
-            <div className="space-y-[1.5vw]">
-              <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">WhatsApp Number</label>
-              <Input
-                type="tel"
-                value={whatsappNumber}
-                onChange={(e) => setWhatsappNumber(e.target.value)}
-                placeholder="+94 77 123 4567"
-                className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
-                required
-              />
-            </div>
-
-            <div className="space-y-[1.5vw]">
-              <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Email Address</label>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="merchant@b2u.pos"
-                className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
-                autoCapitalize="none"
-              />
-            </div>
-
-            <div className="space-y-[1.5vw]">
-              <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Secure Password</label>
-              <div className="relative group">
+          {step === "form" ? (
+            <form onSubmit={handleSignUp} className="space-y-[3vw]">
+              <div className="space-y-[1.5vw]">
+                <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Full Name</label>
                 <Input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold pr-[12vw]"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="John Doe"
+                  className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
+                  required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-[4vw] top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-primary transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-[5vw] h-[5vw]" /> : <Eye className="w-[5vw] h-[5vw]" />}
-                </button>
               </div>
-            </div>
 
-            <div className="space-y-[1.5vw]">
-              <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Confirm Password</label>
-              <div className="relative group">
+              <div className="space-y-[1.5vw]">
+                <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Company Name</label>
                 <Input
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className={cn(
-                    "h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold pr-[12vw]",
-                    confirmPassword && password !== confirmPassword && "border-rose-500 ring-4 ring-rose-500/10"
-                  )}
+                  type="text"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  placeholder="Lanka Solutions PBC"
+                  className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
+                  required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-[4vw] top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-primary transition-colors"
-                >
-                  {showConfirmPassword ? <EyeOff className="w-[5vw] h-[5vw]" /> : <Eye className="w-[5vw] h-[5vw]" />}
-                </button>
               </div>
-            </div>
 
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full h-[14vw] sm:h-14 rounded-[4vw] bg-primary text-white text-[4vw] font-black uppercase tracking-[0.2em] shadow-xl mt-[4vw] active:scale-[0.97]"
-            >
-              {isLoading ? (
-                <Loader2 className="w-[6vw] h-[6vw] animate-spin" />
-              ) : (
-                "Deploy Account"
-              )}
-            </Button>
-          </form>
+              <div className="space-y-[1.5vw]">
+                <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">WhatsApp Number</label>
+                <Input
+                  type="tel"
+                  value={whatsappNumber}
+                  onChange={(e) => setWhatsappNumber(e.target.value)}
+                  placeholder="+94 77 123 4567"
+                  className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
+                  required
+                />
+              </div>
+
+              <div className="space-y-[1.5vw]">
+                <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Email Address</label>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="merchant@b2u.pos"
+                  className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold"
+                  autoCapitalize="none"
+                  required
+                />
+              </div>
+
+              <div className="space-y-[1.5vw]">
+                <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Secure Password</label>
+                <div className="relative group">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold pr-[12vw]"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-[4vw] top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-primary transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-[5vw] h-[5vw]" /> : <Eye className="w-[5vw] h-[5vw]" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-[1.5vw]">
+                <label className="text-[2.2vw] sm:text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-[1vw]">Confirm Password</label>
+                <div className="relative group">
+                  <Input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className={cn(
+                      "h-[12vw] sm:h-12 rounded-[3vw] bg-secondary/30 border-border/40 text-[3.5vw] font-bold pr-[12vw]",
+                      confirmPassword && password !== confirmPassword && "border-rose-500 ring-4 ring-rose-500/10"
+                    )}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-[4vw] top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-primary transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-[5vw] h-[5vw]" /> : <Eye className="w-[5vw] h-[5vw]" />}
+                  </button>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-[14vw] sm:h-14 rounded-[4vw] bg-primary text-white text-[4vw] font-black uppercase tracking-[0.2em] shadow-xl mt-[4vw] active:scale-[0.97]"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-[6vw] h-[6vw] animate-spin" />
+                ) : (
+                  "Create Account"
+                )}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyOtp} className="space-y-[6vw]">
+              <div className="space-y-[2vw] text-center">
+                <label className="text-[2.5vw] sm:text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] block mb-[4vw]">6-Digit Security Code</label>
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
+                  placeholder="000 000"
+                  className="w-full bg-secondary/30 border border-border/40 rounded-[4vw] px-4 h-[18vw] outline-none text-[8vw] font-black text-foreground tracking-[0.4em] text-center focus:border-primary transition-all tabular-nums"
+                  required
+                  autoFocus
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={isLoading || otp.length !== 6}
+                className="w-full h-[14vw] sm:h-14 rounded-[4vw] bg-primary text-white text-[4vw] font-black uppercase tracking-[0.2em] shadow-xl disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-[6vw] h-[6vw] animate-spin" />
+                ) : (
+                  "Verify & Launch"
+                )}
+              </Button>
+              <button 
+                type="button"
+                onClick={() => setStep("form")}
+                className="w-full py-2 text-[2.5vw] sm:text-xs font-black text-muted-foreground uppercase tracking-widest"
+              >
+                Back to Registration
+              </button>
+            </form>
+          )}
 
           <div className="flex flex-col items-center mt-[8vw] space-y-[4vw]">
             <p className="text-[3vw] sm:text-xs font-bold text-muted-foreground/40 uppercase tracking-widest">
