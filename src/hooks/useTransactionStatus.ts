@@ -15,26 +15,48 @@ export function useTransactionStatus(referenceNo: string | null, amount: string,
       return;
     }
 
-    // 1. Initial check: Is it already completed?
+    // 1. Core check function (Initial check + Polling fallback)
     const checkStatus = async () => {
-      const { data, error } = await supabase
+      if (isSuccess) return; // Already succeeded
+      
+      const { data } = await supabase
         .from('completed_transactions')
         .select('id')
         .eq('reference_no', referenceNo)
         .maybeSingle();
       
       if (data) {
-        setIsSuccess(true);
+        handleSuccess();
       }
       setIsInitialCheckDone(true);
     };
 
+    const handleSuccess = () => {
+      setIsSuccess(true);
+      // Trigger voice notification
+      try {
+        const speech = new SpeechSynthesisUtterance(`${amount} rupees received`);
+        if (onDoneSpeaking) {
+          speech.onend = () => {
+            setTimeout(onDoneSpeaking, 1000);
+          };
+        }
+        window.speechSynthesis.speak(speech);
+      } catch (e) {
+        console.error("Speech error:", e);
+        if (onDoneSpeaking) onDoneSpeaking();
+      }
+    };
+
+    // 2. Immediate check
     checkStatus();
 
-    // 2. Real-time listener for "Success"
-    // We listen for INSERT in completed_transactions
+    // 3. Robust Polling Fallback (Every 2 seconds as a safety net)
+    const pollInterval = setInterval(checkStatus, 2000);
+
+    // 4. Real-time listener for "Instant" Success
     const channel = supabase
-      .channel(`comp-${referenceNo}`)
+      .channel(`comp-${referenceNo}-${Date.now()}`)
       .on(
         'postgres_changes',
         {
@@ -43,35 +65,23 @@ export function useTransactionStatus(referenceNo: string | null, amount: string,
           table: 'completed_transactions',
         },
         (payload) => {
-          // Robust comparison: check both raw value and padded value (for 16-digit numeric keys with leading zeros)
+          if (isSuccess) return;
+          
           const rawReceived = String(payload.new.reference_no);
           const paddedReceived = rawReceived.padStart(16, '0');
           
           if (rawReceived === referenceNo || paddedReceived === referenceNo) {
-            setIsSuccess(true);
-            // Trigger voice notification
-            try {
-              const speech = new SpeechSynthesisUtterance(`${amount} rupees received`);
-              if (onDoneSpeaking) {
-                speech.onend = () => {
-                  // Adding a small 1s delay for better UX after speech finishes
-                  setTimeout(onDoneSpeaking, 1000);
-                };
-              }
-              window.speechSynthesis.speak(speech);
-            } catch (e) {
-              console.error("Speech error:", e);
-              if (onDoneSpeaking) onDoneSpeaking();
-            }
+            handleSuccess();
           }
         }
       )
       .subscribe();
 
     return () => {
+      clearInterval(pollInterval);
       supabase.removeChannel(channel);
     };
-  }, [referenceNo, amount, onDoneSpeaking]);
+  }, [referenceNo, amount, onDoneSpeaking, isSuccess]);
 
   return { isSuccess, isInitialCheckDone };
 }

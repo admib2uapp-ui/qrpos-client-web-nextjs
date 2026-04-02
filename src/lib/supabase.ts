@@ -311,12 +311,21 @@ export const fetchAllTransactions = async (merchantId?: string) => {
       created_at: t.created_at,
     });
 
-    const all = [
-      ...pending.map((t, idx) => mapPending(t, idx)),
-      ...completed.map((t, idx) => mapCompleted(t, idx)),
-      ...cancelled.map((t, idx) => mapCancelled(t, idx)),
-    ];
+    // De-duplicate transactions that might be in transition (appearing in both pending and completed/cancelled)
+    // We use a Map keyed by reference_no and overwrite pending with more final statuses
+    const deduplicated = new Map<string, any>();
 
+    pending.forEach((t, idx) => {
+      deduplicated.set(t.reference_no, mapPending(t, idx));
+    });
+    completed.forEach((t, idx) => {
+      deduplicated.set(t.reference_no, mapCompleted(t, idx));
+    });
+    cancelled.forEach((t, idx) => {
+      deduplicated.set(t.reference_no, mapCancelled(t, idx));
+    });
+
+    const all = Array.from(deduplicated.values());
     all.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
     return all;
