@@ -48,6 +48,15 @@ export function ClientApp({ children }: { children: ReactNode }) {
     return isMobile ? <MobileSignIn /> : <SignIn />;
   }
 
+  if (isAuthPage) {
+    return (
+      <div className="h-screen w-screen overflow-hidden bg-background">
+        <InstallPWA />
+        {children}
+      </div>
+    );
+  }
+
   if (isMobile) {
     const isPremiumPage = pathname.includes("/mobile/calculator") || pathname.includes("/mobile/qr");
     return (

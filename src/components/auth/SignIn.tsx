@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 
+import { AuthLayout } from "./AuthLayout";
+
 export function SignIn() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -33,56 +35,32 @@ export function SignIn() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 p-4">
-      <div className="w-full max-w-md">
-        {/* Logo Section */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary shadow-lg mb-4">
-            <svg
-              className="w-8 h-8 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-              />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-slate-800">QR POS</h1>
-          <p className="text-slate-500 mt-1">Accept payments with ease</p>
-        </div>
-
+    <AuthLayout title="Welcome Back" subtitle="Sign in to continue">
+      <div className="w-full">
         {/* Form Card */}
-        <div className="bg-white rounded-2xl p-8 shadow-xl">
-          <h2 className="text-2xl font-bold text-slate-800 mb-1">Welcome Back</h2>
-          <p className="text-slate-500 mb-6">Sign in to continue</p>
+        <div className="glass-card p-8 shadow-2xl border-primary/10">
+          <h2 className="text-3xl font-black text-foreground mb-1 tracking-tight uppercase">Welcome Back</h2>
+          <p className="text-muted-foreground font-medium mb-8">Secure access to your merchant dashboard</p>
 
           {error && (
-            <div className="bg-red-50 text-red-600 text-sm p-4 rounded-lg mb-4 border border-red-100">
+            <div className="bg-rose-500/10 text-rose-500 text-sm p-4 rounded-xl mb-6 border border-rose-500/20 animate-in fade-in slide-in-from-top-2 duration-300">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSignIn}>
+          <form onSubmit={handleSignIn} className="space-y-6">
             {/* Email Input */}
-            <div className="mb-5">
-              <label className="block text-sm font-semibold text-slate-600 mb-2">
-                Email
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
+                Email Address
               </label>
-              <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-4 h-12 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-                <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+              <div className="flex items-center bg-primary/5 border border-primary/10 rounded-xl px-4 h-14 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  className="flex-1 bg-transparent outline-none text-base text-slate-800 ml-3"
+                  placeholder="name@business.com"
+                  className="flex-1 bg-transparent outline-none text-lg text-foreground font-medium"
                   autoCapitalize="none"
                   autoComplete="email"
                   required
@@ -91,90 +69,76 @@ export function SignIn() {
             </div>
 
             {/* Password Input */}
-            <div className="mb-4">
-              <label className="block text-sm font-semibold text-slate-600 mb-2">
-                Password
-              </label>
-              <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-4 h-12 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-                <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="flex-1 bg-transparent outline-none text-base text-slate-800 ml-3"
-                  autoCapitalize="none"
-                  autoComplete="current-password"
-                  required
-                />
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => router.push("/forgot-password")}
+                  className="text-sm font-bold text-primary hover:text-primary/80 transition-colors"
+                >
+                  Forgot?
+                </button>
+              </div>
+              <div className="relative group">
+                <div className="flex items-center bg-primary/5 border border-primary/10 rounded-xl px-4 h-14 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="flex-1 bg-transparent border-none outline-none text-lg text-foreground font-medium tracking-widest pr-12"
+                    autoCapitalize="none"
+                    autoComplete="current-password"
+                    required
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors text-xs font-black uppercase z-10"
                 >
-                  {showPassword ? (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
+                  {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
-            </div>
-
-            {/* Forgot Password */}
-            <div className="flex justify-end mb-6">
-              <button
-                type="button"
-                onClick={() => router.push("/forgot-password")}
-                className="text-sm font-semibold text-primary hover:underline"
-              >
-                Forgot Password?
-              </button>
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 rounded-xl bg-primary text-white font-semibold shadow-lg hover:bg-primary/90 active:scale-95 transition-transform flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full h-14 rounded-xl bg-primary text-white font-black uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4 flex items-center justify-center gap-3"
             >
               {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                "Sign In"
+                "Access Dashboard"
               )}
             </button>
           </form>
 
           {/* Switch Mode */}
-          <div className="flex justify-center mt-6 pt-6 border-t border-slate-100">
-            <span className="text-sm text-slate-500">Don't have an account?</span>
+          <div className="flex justify-center mt-12 pt-8 border-t border-primary/5">
+            <span className="text-sm text-muted-foreground font-medium">New merchant?</span>
             <button
               onClick={() => router.push("/signup")}
-              className="text-sm font-semibold text-primary ml-1 hover:underline"
+              className="text-sm font-bold text-primary ml-2 hover:underline tracking-tight"
             >
-              Sign Up
+              Request Access
             </button>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6">
-          <p className="text-xs text-slate-400">
-            By continuing, you agree to our
-            <button className="text-primary font-semibold ml-1 hover:underline">
-              Terms & Privacy Policy
-            </button>
+        <div className="text-center mt-8">
+          <p className="text-xs text-muted-foreground/60 font-medium">
+            Protected by world-class encryption. <br />
+            By signing in, you agree to our <button className="text-primary hover:underline font-bold">Privacy Policy</button>
           </p>
         </div>
       </div>
-    </div>
+    </AuthLayout>
   );
 }
