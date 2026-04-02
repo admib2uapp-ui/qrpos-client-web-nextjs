@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TransactionForm, TransactionStatus } from "@/components/qr/QRRegistration";
 import { MerchantPulseCard, LiveActivityFeed, MerchantMomentumCard } from "@/components/qr/QRRegistrationComponents";
 import { generateQRData, initiateTransaction } from "@/lib/qrService";
@@ -28,6 +28,13 @@ export default function QRRegistrationPage() {
       setResetKey(prev => prev + 1);
     }
   );
+  
+  // Immediately refresh transactions list when payment is verified
+  useEffect(() => {
+    if (isSuccess) {
+      refresh();
+    }
+  }, [isSuccess, refresh]);
 
   const handleGenerate = async (amount: string, ref: string) => {
     if (!user) return;
@@ -64,13 +71,13 @@ export default function QRRegistrationPage() {
   return (
     <main className="p-4 sm:p-6 lg:p-8 space-y-6 animate-in fade-in duration-700">
       
-      <div className="flex flex-col lg:flex-row items-start gap-6">
+      <div className="flex flex-col lg:flex-row items-stretch gap-6">
         <div className="w-full lg:w-[40%] flex flex-col gap-6">
           <TransactionForm key={resetKey} onGenerate={handleGenerate} isLoading={isLoading} />
           <LiveActivityFeed transactions={transactions} />
         </div>
         
-        <div className="w-full lg:w-[60%] lg:sticky lg:top-6">
+        <div className="w-full lg:w-[60%] flex flex-col gap-6">
             {currentTx ? (
               <TransactionStatus 
                 amount={currentTx.amount} 

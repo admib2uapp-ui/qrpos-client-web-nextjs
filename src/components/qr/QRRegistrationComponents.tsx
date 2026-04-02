@@ -66,7 +66,7 @@ export function MerchantMomentumCard({ transactions }: { transactions: any[] }) 
   }));
 
   return (
-    <Card className="glass-card overflow-hidden border-primary/5 bg-primary/5/30 mt-4">
+    <Card className="glass-card overflow-hidden border-primary/5 bg-primary/5/30 mt-4 h-full flex-1">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
@@ -143,7 +143,7 @@ export function LiveActivityFeed({ transactions }: { transactions: any[] }) {
   const recentPayments = transactions.slice(0, 5);
 
   return (
-    <Card className="glass-card flex flex-col h-full overflow-hidden border-primary/10 min-h-[400px]">
+    <Card className="glass-card flex flex-col h-full flex-1 overflow-hidden border-primary/10 min-h-[400px]">
       <CardHeader className="bg-primary/5 border-b border-primary/10 py-4">
         <CardTitle className="text-lg font-black tracking-tight flex items-center gap-2">
           <Clock className="w-5 h-5 text-primary" />

@@ -82,34 +82,54 @@ export function TransactionStatus({
 
   if (isSuccess) {
     return (
-      <Card className="glass-card p-10 flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-700 bg-emerald-500/5 border-emerald-500/20 shadow-[0_0_50px_rgba(16,185,129,0.1)]">
-        <div className="relative">
-          <div className="absolute inset-0 bg-emerald-500 blur-[30px] opacity-20 animate-pulse" />
-          <div className="relative w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center shadow-xl shadow-emerald-500/30">
-            <CheckCircle2 className="w-14 h-14 text-white animate-in zoom-in spin-in-90 duration-500" />
+      <Card className="glass-card animate-in zoom-in duration-1000 overflow-hidden relative border-emerald-500/30 bg-emerald-500/5 h-full min-h-[600px] flex flex-col items-center justify-center p-8 text-center space-y-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent opacity-50" />
+        
+        <div className="relative group">
+          <div className="absolute inset-0 bg-emerald-500 blur-[40px] opacity-20 group-hover:opacity-40 transition-opacity animate-pulse" />
+          <div className="relative w-32 h-32 bg-emerald-500 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.5)] transform transition-transform group-hover:scale-110 duration-700">
+            <CheckCircle2 className="w-16 h-16 text-white animate-in zoom-in spin-in-180 duration-1000" />
+          </div>
+          <div className="absolute -inset-4 border-2 border-emerald-500/20 rounded-full animate-[ping_3s_infinite]" />
+        </div>
+
+        <div className="space-y-4 relative">
+          <div className="space-y-1">
+            <h2 className="text-4xl font-black text-foreground tracking-tighter uppercase italic">Success</h2>
+            <p className="text-xs font-bold text-emerald-500/80 uppercase tracking-[0.3em]">Payment Received</p>
+          </div>
+          
+          <div className="space-y-1">
+            <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest leading-none">Total Amount</p>
+            <div className="text-5xl font-black text-emerald-500 tracking-tighter flex items-baseline justify-center gap-1">
+              <span className="text-2xl opacity-70">LKR</span>
+              {parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-emerald-500/10">
+            <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest mb-1">Invoice Reference</p>
+            <p className="text-sm font-black text-foreground/80 tracking-widest">{ref}</p>
           </div>
         </div>
-        <div className="text-center space-y-3">
-          <h2 className="text-3xl font-black text-foreground tracking-tight">Payment Received</h2>
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-600 font-black text-xl">
-            LKR {parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-          </div>
-          <p className="text-sm font-bold text-muted-foreground/60 tracking-wider uppercase">{ref}</p>
+
+        <div className="w-full pt-4 relative">
+          <Button 
+            className="w-full h-16 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(16,185,129,0.3)] hover:shadow-[0_25px_50px_rgba(16,185,129,0.4)] active:scale-95 transition-all rounded-2xl"
+            onClick={() => window.location.reload()}
+          >
+            New Transaction
+          </Button>
+          <p className="mt-4 text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">Securely Verified by PeoplesBank</p>
         </div>
-        <Button 
-          className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all"
-          onClick={() => window.location.reload()}
-        >
-          New Transaction
-        </Button>
       </Card>
     );
   }
 
   return (
-    <Card className="glass-card animate-in slide-in-from-right-8 duration-700 overflow-hidden relative border-primary/10">
-      <CardContent className="p-2 flex flex-col items-center text-center">
-        <div className="relative overflow-hidden rounded-[2rem] flex items-center justify-center min-h-[600px] py-4 w-full bg-slate-950/5 dark:bg-slate-950/40 border border-primary/5 p-0">
+    <Card className="glass-card animate-in slide-in-from-right-8 duration-700 overflow-hidden relative border-primary/10 h-full">
+      <CardContent className="p-2 flex flex-col items-center text-center h-full">
+        <div className="relative overflow-hidden rounded-[2rem] flex items-center justify-center h-full py-4 w-full bg-slate-950/5 dark:bg-slate-950/40 border border-primary/5 p-0">
           {loading ? (
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="w-16 h-16 text-primary animate-spin" />
