@@ -23,21 +23,33 @@ export async function POST(request: Request) {
 
     // 1. Basic API Key Check
     if (!apiKey || apiKey !== validApiKey) {
-      console.warn('Unauthorized Verification Attempt: Invalid API Key');
-      return NextResponse.json({ status: 'ERROR', message: 'Unauthorized (1)' }, { status: 401 });
+      console.warn('Unauthorized Verification Attempt: Invalid API Key', { received: apiKey, expected: validApiKey });
+      return NextResponse.json({ status: 'ERROR', code: 'UNAUTHORIZED_1', message: 'Invalid API Key' }, { status: 401 });
     }
 
     // 2. HMAC Signature Verification
     if (secret) {
         if (!signature) {
             console.warn('Unauthorized Verification Attempt: Missing Signature');
-            return NextResponse.json({ status: 'ERROR', message: 'Unauthorized (2)' }, { status: 401 });
+            return NextResponse.json({ status: 'ERROR', code: 'UNAUTHORIZED_2', message: 'Missing Signature' }, { status: 401 });
         }
 
         const isSignatureValid = verifyHMAC(rawBody, signature, secret);
+        
         if (!isSignatureValid) {
-            console.warn('Unauthorized Verification Attempt: Invalid Signature');
-            return NextResponse.json({ status: 'ERROR', message: 'Unauthorized (3)' }, { status: 401 });
+            const expectedSignature = await (async () => {
+              try {
+                const { generateHMAC } = await import('@/lib/crypto');
+                return generateHMAC(rawBody, secret);
+              } catch (e) { return 'ERROR_GENERATING_HMAC'; }
+            })();
+            
+            console.warn('Unauthorized Verification Attempt: Invalid Signature', {
+                received: signature,
+                expected: expectedSignature,
+                bodyPreview: rawBody.substring(0, 100) + '...'
+            });
+            return NextResponse.json({ status: 'ERROR', code: 'UNAUTHORIZED_3', message: 'Invalid Signature' }, { status: 401 });
         }
         
         console.log('HMAC Signature Verified [SECURE]');
